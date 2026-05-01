@@ -19,6 +19,7 @@ import type { Clinic } from "@/lib/types"
 type ClinicDetailsDict = {
   clinicDetails: {
     bookAppointment: string
+    bookAppointmentNote: string
     patientReviews: string
     accessibilityAtAGlance: string
     about: string
@@ -30,6 +31,11 @@ type ClinicDetailsDict = {
     filterWheelchair: string
     filterHearing: string
     filterQuiet: string
+  }
+  clinicListing: {
+    emptyTitle: string
+    emptyMessage: string
+    retry: string
   }
 }
 

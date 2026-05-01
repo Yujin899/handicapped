@@ -201,7 +201,7 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
       description: clinic.description || "",
       descriptionAr: clinic.descriptionAr || "",
       images: clinic.images || [],
-      accessibility: clinic.accessibility || {},
+      accessibility: (clinic.accessibility as Record<string, boolean>) || {},
       governorate: clinic.governorate || "",
       city: clinic.city || "",
       street: clinic.street || "",
@@ -218,7 +218,6 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
       await saveClinic({
         id,
         name: form.name.trim(),
-        location: form.location.trim(),
         specialty: form.specialty.trim(),
         description: form.description.trim(),
         imageSrc: form.images[0] || "",

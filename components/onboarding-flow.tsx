@@ -87,7 +87,6 @@ export function OnboardingFlow({ locale, dict }: { locale: string; dict: Record<
             <div className="flex justify-between pt-4">
               <Button variant="ghost" onClick={handleContinue} disabled={isSaving}>{dict.onboarding.skip}</Button>
               <Button onClick={handleNext} disabled={!userType}>
-              <Button onClick={handleNext} disabled={!userType}>
                 {dict.onboarding.nextButton}
               </Button>
             </div>

@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { ClinicsListingPage } from "@/components/clinics-listing-page"
 import { Locale } from "@/i18n/config"
 import { getDictionary } from "@/i18n/dictionaries"
@@ -10,5 +11,9 @@ export default async function ClinicsPage({
   const { locale } = await params
   const dict = await getDictionary(locale as Locale)
 
-  return <ClinicsListingPage locale={locale} dict={dict} />
+  return (
+    <Suspense fallback={<div>Loading clinics...</div>}>
+      <ClinicsListingPage locale={locale} dict={dict} />
+    </Suspense>
+  )
 }
