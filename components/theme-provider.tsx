@@ -13,8 +13,8 @@ const ThemeContext = React.createContext<ThemeContextValue | undefined>(undefine
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = React.useState<Theme>(() => {
-    if (typeof window === "undefined") return "system"
-    return (window.localStorage.getItem("theme") as Theme | null) ?? "system"
+    if (typeof window === "undefined") return "light"
+    return (window.localStorage.getItem("theme") as Theme | null) ?? "light"
   })
 
   React.useEffect(() => {
