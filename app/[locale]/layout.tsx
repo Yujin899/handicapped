@@ -1,7 +1,21 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "../../components/theme-provider";
+import { Inter, IBM_Plex_Sans_Arabic } from "next/font/google";
 import "../globals.css";
 import { i18n, type Locale } from "../../i18n/config";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
+  variable: "--font-ibm-plex-arabic",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "AccessClinic | Verified Healthcare Accessibility",
@@ -33,7 +47,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={isArabic ? "rtl" : "ltr"}
-      className="h-full antialiased"
+      className={`${inter.variable} ${ibmPlexSansArabic.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col font-sans transition-colors duration-300">

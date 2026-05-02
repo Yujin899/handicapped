@@ -49,7 +49,7 @@
 }
 
 :root {
-  --font-sans: "Segoe UI", Tahoma, Arial, sans-serif;
+  --font-sans: var(--font-inter), var(--font-ibm-plex-arabic), "Segoe UI", Tahoma, Arial, sans-serif;
   --font-mono: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
 
   /* Clean white background */
