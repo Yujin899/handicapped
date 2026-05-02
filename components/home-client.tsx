@@ -148,18 +148,7 @@ export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
               ))
             )}
           </div>
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="md:hidden mt-12"
-          >
-            <Button asChild variant="outline" className="w-full h-14 font-black border-2 rounded-2xl">
-              <Link href={`/${locale}/clinics`}>
-                {dict.actions.viewAll}
-              </Link>
-            </Button>
-          </motion.div>
+
         </div>
       </section>
 
