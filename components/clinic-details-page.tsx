@@ -28,6 +28,15 @@ type ClinicDetailsDict = {
     available: string
     notAvailable: string
   }
+  reviews: {
+    title: string
+    leaveReview: string
+    saving: string
+    placeholder: string
+    addPhotos: string
+    add: string
+    verifiedPatient: string
+  }
   search: {
     filterWheelchair: string
     filterHearing: string
@@ -202,29 +211,14 @@ export function ClinicDetailsPageClient({
           <ClinicReviews
             clinicId={clinic.id}
             locale={locale}
-            title={dict.clinicDetails.patientReviews}
+            title={dict.reviews.title}
             seedReviews={[]}
             accessibilityFeatures={clinic.accessibility}
+            dict={dict}
           />
         </div>
 
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <Card className="rounded-md border-border/80 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-base">{dict.clinicDetails.bookAppointment}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                {dict.clinicDetails.bookAppointmentNote}
-              </p>
-              <Button asChild className="h-12 w-full rounded-md">
-                <Link href={`/${locale}/clinics/${clinic.id}/book`}>
-                  {dict.clinicDetails.bookAppointment}
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </aside>
+        <aside className="lg:sticky lg:top-24 lg:self-start hidden lg:block" />
       </div>
       <AnimatePresence>
         {showStickyBar && (

@@ -31,12 +31,14 @@ export function ClinicReviews({
   title,
   seedReviews,
   accessibilityFeatures = {},
+  dict,
 }: {
   clinicId: string
   locale: string
   title: string
   seedReviews: SeedReview[]
   accessibilityFeatures?: Record<string, boolean | undefined>
+  dict: any
 }) {
   const { currentUser } = useAuth()
   const [reviews, setReviews] = React.useState<Review[]>([])
@@ -152,7 +154,7 @@ export function ClinicReviews({
         rating,
         comment: comment.trim(),
         accessibilityTags: tags,
-        userName: currentUser.displayName || currentUser.email?.split('@')[0] || "Verified Patient",
+        userName: currentUser.displayName || currentUser.email?.split('@')[0] || dict.reviews.verifiedPatient,
         userImage: currentUser.photoURL || "/profile.png",
         images: reviewImages,
       })
@@ -192,7 +194,7 @@ export function ClinicReviews({
             <Textarea
               value={comment}
               onChange={(event) => setComment(event.target.value)}
-              placeholder="Share what accessibility support worked well."
+              placeholder={dict.reviews.placeholder}
               required
             />
             <div className="flex flex-wrap gap-3">
@@ -215,7 +217,7 @@ export function ClinicReviews({
             </div>
 
             <div className="space-y-3">
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Add photos (Max 4)</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{dict.reviews.addPhotos}</label>
               <div className="flex flex-wrap gap-2">
                 {reviewImages.map((url, index) => (
                   <div key={index} className="relative size-20 group">
@@ -236,7 +238,7 @@ export function ClinicReviews({
                     ) : (
                       <>
                         <ImagePlus className="size-5 text-muted-foreground" />
-                        <span className="text-[10px] font-bold text-muted-foreground mt-1 uppercase">Add</span>
+                        <span className="text-[10px] font-bold text-muted-foreground mt-1 uppercase">{dict.reviews.add}</span>
                       </>
                     )}
                     <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploading} />
@@ -250,7 +252,7 @@ export function ClinicReviews({
               </p>
             )}
             <Button type="submit" disabled={isSubmitting || comment.trim().length === 0}>
-              {isSubmitting ? "Saving..." : "Leave review"}
+              {isSubmitting ? dict.reviews.saving : dict.reviews.leaveReview}
             </Button>
           </form>
         </CardContent>
@@ -271,7 +273,7 @@ export function ClinicReviews({
                     />
                   </div>
                   <div>
-                    <p className="font-bold text-foreground leading-none">{review.userName || "Verified patient"}</p>
+                    <p className="font-bold text-foreground leading-none">{review.userName || dict.reviews.verifiedPatient}</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                     {review.accessibilityTags.map((tagId) => {
                       const filter = mockFilters.find(f => f.id === tagId);

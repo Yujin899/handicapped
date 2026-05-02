@@ -3,7 +3,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
 } from "firebase/auth"
 
 import { auth } from "@/lib/firebase"
@@ -12,9 +12,7 @@ import { ensureUserDocument, updateUserProfile } from "@/lib/users"
 const googleProvider = new GoogleAuthProvider()
 
 export async function loginWithGoogle() {
-  const credential = await signInWithPopup(auth, googleProvider)
-  const { isNew } = await ensureUserDocument(credential.user, credential.user.displayName || "")
-  return { user: credential.user, isNew }
+  return await signInWithRedirect(auth, googleProvider)
 }
 
 export async function signUpWithEmail(email: string, password: string, name = "") {

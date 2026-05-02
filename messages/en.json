@@ -119,6 +119,15 @@
     "review3Text": "Great facility overall. The accessible restrooms are well-equipped, though the signage could be slightly larger.",
     "review3Date": "1 month ago"
   },
+  "reviews": {
+    "title": "Patient Reviews",
+    "leaveReview": "Leave review",
+    "saving": "Saving...",
+    "placeholder": "Share what accessibility support worked well.",
+    "addPhotos": "Add photos (Max 4)",
+    "add": "Add",
+    "verifiedPatient": "Verified patient"
+  },
   "clinicListing": {
     "pageTitle": "Accessible Clinics",
     "pageSubtitle": "Find clinics that match your accessibility needs in minutes.",

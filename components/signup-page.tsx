@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { signUpWithEmail, loginWithGoogle } from "@/lib/auth";
+import { auth } from "@/lib/firebase";
 import { getFriendlyFirebaseError } from "@/lib/firebase-errors";
-import { updateAccessibilityPreferences } from "@/lib/users";
+import { updateAccessibilityPreferences, ensureUserDocument } from "@/lib/users";
+import { getRedirectResult } from "firebase/auth";
 import { GoogleIcon } from "./shared-ui";
 
 export function SignupPage({ locale, dict }: { locale: string; dict: Record<string, any> }) {
@@ -18,6 +20,30 @@ export function SignupPage({ locale, dict }: { locale: string; dict: Record<stri
   const [error, setError] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleRedirect = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          setIsGoogleSubmitting(true);
+          await handlePostLogin(result.user.uid);
+          const { isNew } = await ensureUserDocument(result.user, result.user.displayName || "");
+          if (isNew) {
+            router.push(`/${locale}/onboarding`);
+          } else {
+            router.push(`/${locale}`);
+          }
+        }
+      } catch (err) {
+        setError(getFriendlyFirebaseError(err));
+      } finally {
+        setIsGoogleSubmitting(false);
+      }
+    };
+
+    handleRedirect();
+  }, [locale, router]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -44,16 +70,10 @@ export function SignupPage({ locale, dict }: { locale: string; dict: Record<stri
     setIsGoogleSubmitting(true);
 
     try {
-      const { user, isNew } = await loginWithGoogle();
-      await handlePostLogin(user.uid);
-      if (isNew) {
-        router.push(`/${locale}/onboarding`);
-      } else {
-        router.push(`/${locale}`);
-      }
+      await loginWithGoogle();
+      // Browser will redirect
     } catch (err) {
       setError(getFriendlyFirebaseError(err));
-    } finally {
       setIsGoogleSubmitting(false);
     }
   };
@@ -159,9 +179,6 @@ export function SignupPage({ locale, dict }: { locale: string; dict: Record<stri
                 {dict.auth.google}
               </div>
             )}
-          </Button>
-          <Button variant="ghost" className="w-full" size="xl" type="button" asChild>
-            <Link href={`/${locale}/onboarding`}>{dict.auth.guest}</Link>
           </Button>
         </div>
       </div>
