@@ -28,5 +28,12 @@ export const mockFilters: Filter[] = [
     labelAr: "مساعدة بصرية",
     icon: "Eye",
     isPopular: false
+  },
+  {
+    id: "homeVisit",
+    label: "Home Visit",
+    labelAr: "زيارة منزلية",
+    icon: "Home",
+    isPopular: true
   }
 ]

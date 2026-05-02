@@ -50,7 +50,7 @@ export async function getUser(uid: string) {
 
 export async function updateUserProfile(
   uid: string,
-  data: Partial<Pick<UserProfile, "name" | "accessibilityPreferences" | "medicalConditions">>
+  data: Partial<Pick<UserProfile, "name" | "accessibilityPreferences" | "medicalConditions" | "photoURL">>
 ) {
   await updateDoc(doc(db, "users", uid), data)
 }

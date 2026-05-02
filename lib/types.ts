@@ -6,6 +6,7 @@ export type UserProfile = {
   uid: string
   email: string | null
   name: string
+  photoURL?: string
   createdAt: Timestamp | null
   accessibilityPreferences: AccessibilityPreference[]
   medicalConditions?: string[]
@@ -18,6 +19,7 @@ export type Clinic = {
   nameAr?: string
   imageSrc?: string
   imageAlt?: string
+  allowsHomeVisit?: boolean
   images?: string[]
   rating?: number
   reviews?: number
@@ -42,6 +44,8 @@ export type Clinic = {
   }
 }
 
+export type BookingStatus = "pending" | "confirmed" | "checked-in" | "in-progress" | "completed" | "cancelled"
+
 export type Booking = {
   id: string
   userId: string
@@ -50,17 +54,24 @@ export type Booking = {
   date: string
   time: string
   notes: string
+  status?: BookingStatus
+  checkInTime?: Timestamp | null
   createdAt: Timestamp | null
   medicalConditions?: string[]
   accessibilityPreferences?: AccessibilityPreference[]
+  visitType?: "clinic" | "home"
+  patientAddress?: string
 }
 
 export type Review = {
   id: string
   userId: string
+  userName?: string
+  userImage?: string
   clinicId: string
   rating: number
   comment: string
+  images?: string[]
   accessibilityTags: AccessibilityPreference[]
   createdAt: Timestamp | null
 }
@@ -69,9 +80,14 @@ export type CreateBookingInput = Omit<Booking, "id" | "createdAt" | "userId"> & 
   userId: string
   medicalConditions?: string[]
   accessibilityPreferences?: AccessibilityPreference[]
+  visitType: "clinic" | "home"
+  patientAddress?: string
 }
 
-export type CreateReviewInput = Omit<Review, "id" | "createdAt" | "userId"> & {
+export type CreateReviewInput = Omit<Review, "id" | "createdAt" | "userId" | "userName" | "userImage"> & {
   userId: string
+  userName?: string
+  userImage?: string
+  images?: string[]
 }
 

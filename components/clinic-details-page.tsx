@@ -3,7 +3,8 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Accessibility, Ear, MapPin, Star, VolumeX } from "lucide-react"
+import { Accessibility, Ear, MapPin, Star, VolumeX, ChevronRight } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
 
 import { ClinicReviews } from "@/components/clinic-reviews"
 import { ImageSlider } from "@/components/image-slider"
@@ -36,6 +37,7 @@ type ClinicDetailsDict = {
     emptyTitle: string
     emptyMessage: string
     retry: string
+    homeVisitBadge: string
   }
 }
 
@@ -51,6 +53,33 @@ export function ClinicDetailsPageClient({
   const [clinic, setClinic] = React.useState<Clinic | null>(null)
   const [availableFilters, setAvailableFilters] = React.useState<Filter[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [showStickyBar, setShowStickyBar] = React.useState(false)
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      // Show sticky bar after scrolling down 400px
+      if (window.scrollY > 400) {
+        setShowStickyBar(true)
+      } else {
+        setShowStickyBar(false)
+      }
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    handleScroll() // Initial check
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  React.useEffect(() => {
+    if (showStickyBar) {
+      document.documentElement.style.setProperty('--chat-widget-offset', '80px')
+    } else {
+      document.documentElement.style.setProperty('--chat-widget-offset', '0px')
+    }
+    // Reset on unmount
+    return () => {
+      document.documentElement.style.setProperty('--chat-widget-offset', '0px')
+    }
+  }, [showStickyBar])
 
   React.useEffect(() => {
     getFilters().then(setAvailableFilters)
@@ -109,6 +138,11 @@ export function ClinicDetailsPageClient({
               <Badge variant="secondary" className="rounded-md">
                 {locale === 'ar' ? clinic.specialtyAr || clinic.specialty : clinic.specialty || "Healthcare"}
               </Badge>
+              {clinic.allowsHomeVisit && (
+                <Badge className="rounded-md bg-emerald-500 text-white hover:bg-emerald-600 border-none">
+                  {dict.clinicListing.homeVisitBadge}
+                </Badge>
+              )}
               <span className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-1 text-xs font-semibold">
                 <Star className="size-3.5 fill-current text-primary" />
                 {(clinic.rating ?? 0).toFixed(1)} ({clinic.reviews ?? 0})
@@ -143,25 +177,16 @@ export function ClinicDetailsPageClient({
             <h2 className="text-2xl font-semibold tracking-tight">
               {dict.clinicDetails.accessibilityAtAGlance}
             </h2>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {accessibility.map((feature) => {
+            <div className="grid gap-3 sm:grid-cols-4 lg:grid-cols-5">
+              {accessibility.filter(f => f.available).map((feature) => {
                 const Icon = feature.icon
                 return (
-                  <Card key={feature.key} className="rounded-md border-border/80 shadow-sm">
-                    <CardContent className="space-y-3 p-4 pt-4">
-                      <div className="inline-flex size-10 items-center justify-center rounded-md bg-primary/10 text-primary">
-                        <Icon className="size-5" />
-                      </div>
-                      <div>
-                        <p className="font-semibold">{feature.label}</p>
-                        <p className={`mt-1 text-sm font-bold ${feature.available ? 'text-green-600 dark:text-green-400' : 'text-destructive/80'}`}>
-                          {feature.available
-                            ? dict.clinicDetails.available
-                            : dict.clinicDetails.notAvailable}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div key={feature.key} className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-border/60 bg-muted/20 p-4 text-center transition-all hover:bg-muted/40 hover:border-primary/20">
+                    <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-background shadow-sm text-primary">
+                      <Icon className="size-6" />
+                    </div>
+                    <p className="text-xs font-bold leading-tight">{feature.label}</p>
+                  </div>
                 )
               })}
             </div>
@@ -179,6 +204,7 @@ export function ClinicDetailsPageClient({
             locale={locale}
             title={dict.clinicDetails.patientReviews}
             seedReviews={[]}
+            accessibilityFeatures={clinic.accessibility}
           />
         </div>
 
@@ -200,6 +226,41 @@ export function ClinicDetailsPageClient({
           </Card>
         </aside>
       </div>
+      <AnimatePresence>
+        {showStickyBar && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/50 bg-background/80 p-4 shadow-[0_-8px_30px_rgb(0,0,0,0.08)] backdrop-blur-xl"
+            dir={locale === 'ar' ? 'rtl' : 'ltr'}
+          >
+            <div className="container mx-auto flex max-w-7xl items-center justify-between gap-4">
+              <div className="hidden flex-col sm:flex">
+                <p className="text-sm font-bold text-foreground">
+                  {locale === 'ar' ? clinic.nameAr || clinic.name : clinic.name}
+                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Star className="size-3 fill-current text-primary" />
+                    {(clinic.rating ?? 0).toFixed(1)}
+                  </span>
+                  <span className="text-xs text-muted-foreground opacity-50">•</span>
+                  <span className="text-xs text-muted-foreground">
+                    {locale === 'ar' ? clinic.specialtyAr || clinic.specialty : clinic.specialty}
+                  </span>
+                </div>
+              </div>
+              <Button asChild className="h-12 flex-1 sm:flex-none sm:px-12 rounded-xl font-black text-base shadow-lg shadow-primary/20 transition-transform active:scale-95">
+                <Link href={`/${locale}/clinics/${clinic.id}/book`}>
+                  {dict.clinicDetails.bookAppointment}
+                </Link>
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   )
 }

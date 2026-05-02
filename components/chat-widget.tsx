@@ -239,9 +239,12 @@ export function ChatWidget({ locale }: { locale: string }) {
   return (
     <div
       className={cn(
-        "fixed bottom-6 z-50 flex flex-col items-end",
-        isArabic ? "left-6" : "right-6"
+        "fixed bottom-4 sm:bottom-6 z-50 flex flex-col items-end transition-all duration-300 ease-in-out",
+        isArabic ? "left-4 sm:left-6" : "right-4 sm:right-6"
       )}
+      style={{ 
+        transform: `translateY(calc(-1 * var(--chat-widget-offset, 0px)))` 
+      } as React.CSSProperties}
     >
       <AnimatePresence>
         {isOpen && (
@@ -250,11 +253,11 @@ export function ChatWidget({ locale }: { locale: string }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             className={cn(
-              "mb-4 w-[360px] sm:w-[420px]",
+              "mb-4 w-[calc(100vw-2rem)] sm:w-[400px] md:w-[440px]",
               isArabic ? "origin-bottom-left" : "origin-bottom-right"
             )}
           >
-            <div className="flex h-[560px] flex-col overflow-hidden rounded-2xl border border-border/50 shadow-2xl bg-background">
+            <div className="flex h-[min(600px,calc(100vh-120px))] flex-col overflow-hidden rounded-2xl border border-border/50 shadow-2xl bg-background">
 
               {/* ── Header ── */}
               <div className="flex items-center justify-between gap-3 bg-primary px-4 py-3 text-primary-foreground shrink-0">
@@ -312,48 +315,54 @@ export function ChatWidget({ locale }: { locale: string }) {
                   </motion.div>
                 )}
 
-                {/* Chat messages */}
-                {messages.map((m) => (
-                  <motion.div
-                    key={m.id}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={cn(
-                      "flex items-end gap-2.5",
-                      m.role === "user" ? "flex-row-reverse" : "flex-row"
-                    )}
-                  >
-                    {m.role === "assistant" && (
-                      <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full border border-border shadow mb-1">
-                        <Image src="/mosaed.png" alt="Mosaed" fill className="object-cover" />
-                      </div>
-                    )}
-                    <div
+                {messages.map((m) => {
+                  return (
+                    <motion.div
+                      key={m.id}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
                       className={cn(
-                        "max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap",
-                        m.role === "user"
-                          ? "bg-primary text-primary-foreground rounded-br-none"
-                          : "bg-white border border-border/60 text-foreground rounded-bl-none shadow-sm"
+                        "flex items-end gap-2.5",
+                        m.role === "user" ? "flex-row-reverse" : "flex-row"
                       )}
                     >
-                      {m.role === "user" ? (m.displayContent || m.content) : (
-                        m.content ? parseMessageText(m.content).map((part, i) => {
-                          if (part.startsWith("[CLINIC_CARD:") && part.endsWith("]")) {
-                            const id = part.slice(13, -1)
-                            return <ClinicCardInline key={i} id={id} isArabic={isArabic} locale={locale} />
-                          }
-                          return <React.Fragment key={i}>{part}</React.Fragment>
-                        }) : (
-                          <span className="flex gap-1 items-center py-0.5">
-                            <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce [animation-delay:0ms]" />
-                            <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce [animation-delay:150ms]" />
-                            <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce [animation-delay:300ms]" />
-                          </span>
-                        )
+                      {m.role === "assistant" && (
+                        <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full border border-border shadow mb-1">
+                          <Image src="/mosaed.png" alt="Mosaed" fill className="object-cover" />
+                        </div>
                       )}
-                    </div>
-                  </motion.div>
-                ))}
+                      {m.role === "user" && (
+                        <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full border border-border shadow mb-1">
+                          <Image src={profile?.photoURL || "/profile.png"} alt="User" fill className="object-cover" />
+                        </div>
+                      )}
+                      <div
+                        className={cn(
+                          "max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap",
+                          m.role === "user"
+                            ? "bg-primary text-primary-foreground rounded-br-none"
+                            : "bg-white border border-border/60 text-foreground rounded-bl-none shadow-sm"
+                        )}
+                      >
+                        {m.role === "user" ? (m.displayContent || m.content) : (
+                          m.content ? parseMessageText(m.content).map((part, i) => {
+                            if (part.startsWith("[CLINIC_CARD:") && part.endsWith("]")) {
+                              const id = part.slice(13, -1)
+                              return <ClinicCardInline key={i} id={id} isArabic={isArabic} locale={locale} />
+                            }
+                            return <React.Fragment key={i}>{part}</React.Fragment>
+                          }) : (
+                            <span className="flex gap-1 items-center py-0.5">
+                              <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce [animation-delay:0ms]" />
+                              <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce [animation-delay:150ms]" />
+                              <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce [animation-delay:300ms]" />
+                            </span>
+                          )
+                        )}
+                      </div>
+                    </motion.div>
+                  )
+                })}
 
                 {/* Error */}
                 {error && (

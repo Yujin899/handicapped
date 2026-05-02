@@ -41,12 +41,8 @@ export function Footer({ dict, locale }: { dict: any; locale: string }) {
             </div>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-sm font-black text-muted-foreground uppercase tracking-widest">
+        <div className="flex flex-col items-center gap-6 text-sm font-black text-muted-foreground uppercase tracking-widest text-center">
           <p>{dict.footer.copyright.replace('{year}', new Date().getFullYear().toString())}</p>
-          <div className="flex gap-8">
-            <Link href="#" className="hover:text-primary transition-colors">Twitter</Link>
-            <Link href="#" className="hover:text-primary transition-colors">Instagram</Link>
-          </div>
         </div>
       </div>
     </footer>

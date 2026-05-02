@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Star } from "lucide-react"
+import { Star, ImagePlus, X, Loader2 } from "lucide-react"
+import Image from "next/image"
 
 import { useAuth } from "@/components/auth-provider"
 import { Badge } from "@/components/shared-ui"
@@ -29,11 +30,13 @@ export function ClinicReviews({
   locale,
   title,
   seedReviews,
+  accessibilityFeatures = {},
 }: {
   clinicId: string
   locale: string
   title: string
   seedReviews: SeedReview[]
+  accessibilityFeatures?: Record<string, boolean | undefined>
 }) {
   const { currentUser } = useAuth()
   const [reviews, setReviews] = React.useState<Review[]>([])
@@ -43,6 +46,13 @@ export function ClinicReviews({
   const [error, setError] = React.useState("")
   const [loading, setLoading] = React.useState(true)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [reviewImages, setReviewImages] = React.useState<string[]>([])
+  const [isUploading, setIsUploading] = React.useState(false)
+
+  // Only show tags that the clinic actually has
+  const availableTagOptions = React.useMemo(() => {
+    return tagOptions.filter(option => accessibilityFeatures[option.id]);
+  }, [accessibilityFeatures]);
 
   const loadReviews = React.useCallback(async () => {
     setLoading(true)
@@ -80,6 +90,50 @@ export function ClinicReviews({
     )
   }
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
+
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+
+    if (!cloudName || !uploadPreset) {
+      setError("Cloudinary configuration missing.")
+      return
+    }
+
+    setIsUploading(true)
+    setError("")
+
+    try {
+      const urls: string[] = []
+      for (const file of Array.from(files).slice(0, 4)) {
+        const formData = new FormData()
+        formData.append("file", file)
+        formData.append("upload_preset", uploadPreset)
+
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!response.ok) throw new Error("Upload failed")
+        const data = await response.json()
+        urls.push(data.secure_url)
+      }
+      setReviewImages(prev => [...prev, ...urls].slice(0, 4))
+    } catch (err) {
+      setError("Image upload failed.")
+    } finally {
+      setIsUploading(false)
+      event.target.value = ""
+    }
+  }
+
+  const removeImage = (index: number) => {
+    setReviewImages(prev => prev.filter((_, i) => i !== index))
+  }
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     setError("")
@@ -98,10 +152,14 @@ export function ClinicReviews({
         rating,
         comment: comment.trim(),
         accessibilityTags: tags,
+        userName: currentUser.displayName || currentUser.email?.split('@')[0] || "Verified Patient",
+        userImage: currentUser.photoURL || "/profile.png",
+        images: reviewImages,
       })
       setComment("")
       setTags([])
       setRating(5)
+      setReviewImages([])
       await loadReviews()
     } catch (err) {
       setError(getFriendlyFirebaseError(err))
@@ -138,7 +196,7 @@ export function ClinicReviews({
               required
             />
             <div className="flex flex-wrap gap-3">
-              {tagOptions.map((filter) => {
+              {availableTagOptions.map((filter) => {
                 const Icon = iconMap[filter.icon] || Star;
                 const isActive = tags.includes(filter.id);
                 return (
@@ -154,6 +212,37 @@ export function ClinicReviews({
                   </Button>
                 );
               })}
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Add photos (Max 4)</label>
+              <div className="flex flex-wrap gap-2">
+                {reviewImages.map((url, index) => (
+                  <div key={index} className="relative size-20 group">
+                    <img src={url} alt="" className="object-cover w-full h-full rounded-xl border border-border/50" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                    >
+                      <X className="size-3" />
+                    </button>
+                  </div>
+                ))}
+                {reviewImages.length < 4 && (
+                  <label className={`flex flex-col items-center justify-center size-20 border-2 border-dashed rounded-xl cursor-pointer transition-all ${isUploading ? 'bg-muted/50 cursor-wait' : 'border-border hover:border-primary hover:bg-primary/5'}`}>
+                    {isUploading ? (
+                      <Loader2 className="size-5 animate-spin text-primary" />
+                    ) : (
+                      <>
+                        <ImagePlus className="size-5 text-muted-foreground" />
+                        <span className="text-[10px] font-bold text-muted-foreground mt-1 uppercase">Add</span>
+                      </>
+                    )}
+                    <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploading} />
+                  </label>
+                )}
+              </div>
             </div>
             {error && (
               <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">
@@ -172,9 +261,18 @@ export function ClinicReviews({
           <Card key={review.id} className="rounded-2xl border-2 shadow-none bg-background">
             <CardContent className="p-6 pt-6 space-y-4">
               <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="font-bold text-foreground leading-none">Verified patient</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-background shadow-sm">
+                    <Image 
+                      src={review.userImage || "/profile.png"} 
+                      alt={review.userName || "User"} 
+                      fill 
+                      className="object-cover" 
+                    />
+                  </div>
+                  <div>
+                    <p className="font-bold text-foreground leading-none">{review.userName || "Verified patient"}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
                     {review.accessibilityTags.map((tagId) => {
                       const filter = mockFilters.find(f => f.id === tagId);
                       if (!filter) return null;
@@ -188,12 +286,23 @@ export function ClinicReviews({
                     })}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 bg-secondary/50 px-2 py-1 rounded-md">
+              </div>
+              <div className="flex items-center gap-1 bg-secondary/50 px-2 py-1 rounded-md">
                   <Star className="h-3.5 w-3.5 fill-current text-primary" />
                   <span className="text-sm font-bold text-secondary-foreground">{review.rating}</span>
                 </div>
               </div>
               <p className="text-muted-foreground text-sm leading-relaxed font-medium">&quot;{review.comment}&quot;</p>
+              
+              {review.images && review.images.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {review.images.map((img, i) => (
+                    <div key={i} className="relative h-24 w-32 shrink-0 overflow-hidden rounded-xl border border-border/50">
+                      <Image src={img} alt="Review attachment" fill className="object-cover" />
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}

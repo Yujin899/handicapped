@@ -45,6 +45,16 @@ export async function deleteClinic(id: string) {
   await deleteDoc(doc(db, "clinics", id))
 }
 
+export async function updateBookingStatus(
+  bookingId: string, 
+  status: Booking["status"], 
+  checkInTime?: any
+) {
+  const updateData: any = { status }
+  if (checkInTime) updateData.checkInTime = checkInTime
+  await setDoc(doc(db, "bookings", bookingId), updateData, { merge: true })
+}
+
 export async function createBooking(input: CreateBookingInput) {
   const bookingRef = await addDoc(collection(db, "bookings"), {
     userId: input.userId,
@@ -55,6 +65,8 @@ export async function createBooking(input: CreateBookingInput) {
     notes: input.notes,
     medicalConditions: input.medicalConditions || [],
     accessibilityPreferences: input.accessibilityPreferences || [],
+    visitType: input.visitType || "clinic",
+    patientAddress: input.patientAddress || "",
     createdAt: serverTimestamp(),
   })
 
@@ -89,9 +101,12 @@ export async function getAllBookings() {
 export async function createReview(input: CreateReviewInput) {
   const reviewRef = await addDoc(collection(db, "reviews"), {
     userId: input.userId,
+    userName: input.userName || "Verified Patient",
+    userImage: input.userImage || "/profile.png",
     clinicId: input.clinicId,
     rating: input.rating,
     comment: input.comment,
+    images: input.images || [],
     accessibilityTags: input.accessibilityTags,
     createdAt: serverTimestamp(),
   })

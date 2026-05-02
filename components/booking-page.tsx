@@ -31,6 +31,12 @@ type BookingDict = {
     confirmBooking: string
     requiredField: string
     selectedDateLabel: string
+    visitType: string
+    clinicVisit: string
+    homeVisit: string
+    homeAddress: string
+    addressPlaceholder: string
+    homeVisitNote: string
   }
   bookingSuccess: {
     accessibilityNotesTitle: string
@@ -82,6 +88,9 @@ export function BookingPage({
   const [error, setError] = React.useState("")
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [firestoreClinicName, setFirestoreClinicName] = React.useState("")
+  const [allowsHomeVisit, setAllowsHomeVisit] = React.useState(false)
+  const [visitType, setVisitType] = React.useState<"clinic" | "home">("clinic")
+  const [patientAddress, setPatientAddress] = React.useState("")
 
   const fallbackClinicName = clinicId
     .split("-")
@@ -91,7 +100,10 @@ export function BookingPage({
 
   React.useEffect(() => {
     getClinicById(clinicId)
-      .then((clinic) => setFirestoreClinicName(clinic?.name ?? ""))
+      .then((clinic) => {
+        setFirestoreClinicName(clinic?.name ?? "")
+        setAllowsHomeVisit(!!clinic?.allowsHomeVisit)
+      })
       .catch(() => setFirestoreClinicName(""))
   }, [clinicId])
 
@@ -142,6 +154,8 @@ export function BookingPage({
         notes: note.trim(),
         medicalConditions: profile?.medicalConditions || [],
         accessibilityPreferences: profile?.accessibilityPreferences || [],
+        visitType: visitType,
+        patientAddress: visitType === "home" ? patientAddress.trim() : "",
       })
 
       const params = new URLSearchParams({
@@ -152,6 +166,8 @@ export function BookingPage({
         note: note.trim(),
         prefs: accessibilityNotes.join("|"),
         conditions: medicalConditionsNotes.join("|"),
+        type: visitType,
+        address: visitType === "home" ? patientAddress.trim() : "",
       })
 
       router.push(`/${locale}/booking/success?${params.toString()}`)
@@ -233,6 +249,53 @@ export function BookingPage({
                   ))}
                 </div>
               </div>
+
+              {allowsHomeVisit && (
+                <div className="space-y-4 rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-bold text-primary">
+                      {dict.booking.visitType}
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant={visitType === "clinic" ? "default" : "outline"}
+                        className="flex-1 rounded-md"
+                        onClick={() => setVisitType("clinic")}
+                      >
+                        {dict.booking.clinicVisit}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={visitType === "home" ? "default" : "outline"}
+                        className="flex-1 rounded-md"
+                        onClick={() => setVisitType("home")}
+                      >
+                        {dict.booking.homeVisit}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {visitType === "home" && (
+                    <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <label htmlFor="patient-address" className="text-sm font-medium">
+                        {dict.booking.homeAddress} <span className="text-destructive">*</span>
+                      </label>
+                      <Input
+                        id="patient-address"
+                        value={patientAddress}
+                        onChange={(e) => setPatientAddress(e.target.value)}
+                        placeholder={dict.booking.addressPlaceholder}
+                        className="h-11 border-primary/30"
+                        required
+                      />
+                      <p className="text-[10px] text-muted-foreground">
+                        {dict.booking.homeVisitNote}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <Separator />
 

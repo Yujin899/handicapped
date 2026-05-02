@@ -26,6 +26,8 @@ export default async function BookingSuccessPage({
   const note = typeof query.note === "string" ? query.note : ""
   const prefsRaw = typeof query.prefs === "string" ? query.prefs : ""
   const prefs = prefsRaw ? prefsRaw.split("|").filter(Boolean) : []
+  const visitType = typeof query.type === "string" ? query.type : "clinic"
+  const address = typeof query.address === "string" ? query.address : ""
 
   return (
     <section className="container mx-auto max-w-3xl px-4 py-10 md:px-6 md:py-14">
@@ -67,10 +69,24 @@ export default async function BookingSuccessPage({
                   <MapPin className="size-3.5" /> {dict.bookingSuccess.location}
                 </p>
                 <p className="mt-1 text-sm font-medium">
-                  {isArabic ? "المنطقة الطبية" : "Healthcare District"}
+                  {visitType === "home" 
+                    ? dict.bookingSuccess.homeVisitTitle
+                    : (isArabic ? "المنطقة الطبية" : "Healthcare District")}
                 </p>
               </div>
             </div>
+
+            {visitType === "home" && address && (
+              <div className="rounded-md border border-primary/20 bg-primary/5 p-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-primary">
+                  {dict.bookingSuccess.visitAddress}
+                </p>
+                <p className="mt-1 text-sm font-semibold">{address}</p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {dict.bookingSuccess.visitAddressNote}
+                </p>
+              </div>
+            )}
 
             {prefs.length > 0 && (
               <>
@@ -105,9 +121,6 @@ export default async function BookingSuccessPage({
             <Link href={`/${locale}/clinics/oakwood-medical-center`}>
               {dict.bookingSuccess.viewClinic}
             </Link>
-          </Button>
-          <Button variant="ghost" className="h-11 rounded-md sm:px-4">
-            {dict.bookingSuccess.addToCalendar}
           </Button>
         </div>
       </div>

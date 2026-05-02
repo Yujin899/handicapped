@@ -136,7 +136,8 @@
     "errorTitle": "We could not load clinics right now",
     "errorMessage": "Check your connection and try again.",
     "retry": "Try again",
-    "staleNotice": "Showing the latest saved results while we reconnect."
+    "staleNotice": "Showing the latest saved results while we reconnect.",
+    "homeVisitBadge": "Home Visit Available"
   },
   "booking": {
     "title": "Book your appointment",
@@ -152,7 +153,13 @@
     "accessibilityReminder": "Accessibility reminders",
     "confirmBooking": "Confirm Booking",
     "requiredField": "Please enter your name to continue.",
-    "selectedDateLabel": "Selected date"
+    "selectedDateLabel": "Selected date",
+    "visitType": "Visit Type",
+    "clinicVisit": "Clinic Visit",
+    "homeVisit": "Home Visit",
+    "homeAddress": "Home Address",
+    "addressPlaceholder": "Enter your full address...",
+    "homeVisitNote": "The medical team will come to your location at the selected time."
   },
   "bookingSuccess": {
     "title": "Appointment booked successfully",
@@ -165,7 +172,10 @@
     "note": "Your note",
     "backToClinics": "Back to Clinics",
     "viewClinic": "View Clinic",
-    "addToCalendar": "Add to calendar"
+    "addToCalendar": "Add to calendar",
+    "homeVisitTitle": "Home Visit - Team will come to you",
+    "visitAddress": "Visit Address",
+    "visitAddressNote": "Ensure someone is present at this location at the selected time."
   },
   "auth": {
     "loginTitle": "Welcome back",
@@ -234,7 +244,15 @@
     "userRole": "Patient account",
     "openAdmin": "Open admin dashboard",
     "confirmed": "Confirmed",
-    "loading": "Loading your profile..."
+    "loading": "Loading your profile...",
+    "queue": {
+      "status": "Queue Status",
+      "patientsAhead": "{count} patients ahead of you",
+      "nextInLine": "You are next!",
+      "inProgress": "Doctor is seeing you now",
+      "checkedIn": "Checked in at {time}",
+      "pleaseProceed": "Please proceed to the doctor's room"
+    }
   },
   "admin": {
     "badge": "Admin",

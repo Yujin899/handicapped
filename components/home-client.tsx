@@ -20,11 +20,11 @@ export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
     });
   }, []);
   const fadeIn: Variants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 10 },
     visible: { 
       opacity: 1, 
       y: 0,
-      transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }
+      transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const }
     }
   };
 
@@ -33,7 +33,7 @@ export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.12,
+        staggerChildren: 0.08,
         delayChildren: 0.1
       }
     }
@@ -78,15 +78,15 @@ export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
         
         {/* Subtle Decorative Elements */}
         <motion.div 
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10" 
         />
         <motion.div 
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
           className="absolute top-1/2 -left-24 w-72 h-72 bg-primary/3 rounded-full blur-3xl -z-10" 
         />
       </section>
@@ -186,10 +186,10 @@ export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
             return (
               <motion.div 
                 key={step.id}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: step.id * 0.1 }}
+                transition={{ duration: 0.5, delay: step.id * 0.08 }}
                 className="flex flex-col items-center text-center gap-8 group"
               >
                 <div className={`h-20 w-20 rounded-[28px] ${step.primary ? 'bg-primary text-primary-foreground shadow-2xl shadow-primary/30' : 'bg-primary/10 text-primary shadow-inner'} flex items-center justify-center ${step.rotate} rtl:rotate-0 transition-transform group-hover:rotate-0 duration-500`}>
@@ -241,10 +241,10 @@ export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
           </motion.div>
           
           <motion.div 
-            initial={{ opacity: 0, x: 40 }}
+            initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="relative hidden lg:block"
           >
             <div className="bg-background rounded-[40px] border-2 border-primary/10 p-12 space-y-8 shadow-2xl">
@@ -286,10 +286,10 @@ export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
       {/* 6. High-Contrast CTA */}
       <section className="container mx-auto max-w-7xl px-4 sm:px-6 pb-16 md:pb-24 lg:pb-32">
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] as const }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] as const }}
           className="bg-primary text-primary-foreground rounded-[32px] md:rounded-[48px] lg:rounded-[64px] py-16 md:py-24 lg:py-32 px-6 md:px-12 text-center shadow-3xl shadow-primary/20 relative overflow-hidden group"
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,hsl(var(--primary-foreground)_/_0.15),transparent)]" />

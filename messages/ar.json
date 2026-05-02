@@ -136,7 +136,8 @@
     "errorTitle": "تعذر تحميل العيادات حالياً",
     "errorMessage": "تحقق من اتصالك بالإنترنت ثم حاول مرة أخرى.",
     "retry": "إعادة المحاولة",
-    "staleNotice": "نعرض أحدث النتائج المحفوظة أثناء إعادة الاتصال."
+    "staleNotice": "نعرض أحدث النتائج المحفوظة أثناء إعادة الاتصال.",
+    "homeVisitBadge": "زيارة منزلية متاحة"
   },
   "booking": {
     "title": "احجز موعدك",
@@ -152,7 +153,13 @@
     "accessibilityReminder": "تذكير بإمكانية الوصول",
     "confirmBooking": "تأكيد الحجز",
     "requiredField": "يرجى إدخال اسمك للمتابعة.",
-    "selectedDateLabel": "التاريخ المحدد"
+    "selectedDateLabel": "التاريخ المحدد",
+    "visitType": "نوع الزيارة",
+    "clinicVisit": "زيارة العيادة",
+    "homeVisit": "زيارة منزلية",
+    "homeAddress": "عنوان المنزل",
+    "addressPlaceholder": "أدخل عنوانك بالتفصيل...",
+    "homeVisitNote": "سيصل الفريق الطبي إلى موقعك في الوقت المحدد."
   },
   "bookingSuccess": {
     "title": "تم حجز الموعد بنجاح",
@@ -165,7 +172,10 @@
     "note": "ملاحظتك",
     "backToClinics": "العودة إلى العيادات",
     "viewClinic": "عرض العيادة",
-    "addToCalendar": "إضافة إلى التقويم"
+    "addToCalendar": "إضافة إلى التقويم",
+    "homeVisitTitle": "زيارة منزلية - سيصل الفريق إليك",
+    "visitAddress": "عنوان الزيارة",
+    "visitAddressNote": "تأكد من تواجد شخص في هذا الموقع في الوقت المحدد."
   },
   "auth": {
     "loginTitle": "مرحباً بك مجدداً",
@@ -234,7 +244,15 @@
     "userRole": "حساب مريض",
     "openAdmin": "فتح لوحة التحكم",
     "confirmed": "مؤكد",
-    "loading": "جاري تحميل ملفك الشخصي..."
+    "loading": "جاري تحميل ملفك الشخصي...",
+    "queue": {
+      "status": "حالة الانتظار",
+      "patientsAhead": "يوجد {count} مرضى قبلك",
+      "nextInLine": "أنت التالي!",
+      "inProgress": "الطبيب يراك الآن",
+      "checkedIn": "تم تسجيل الوصول في {time}",
+      "pleaseProceed": "يرجى التوجه لغرفة الطبيب"
+    }
   },
   "admin": {
     "badge": "المسؤول",

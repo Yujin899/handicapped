@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Building2, CalendarCheck, ImagePlus, Loader2, MessageSquareText, UsersRound, X } from "lucide-react"
+import { Building2, CalendarCheck, Clock, ImagePlus, Loader2, MessageSquareText, Play, UsersRound, X } from "lucide-react"
+import { serverTimestamp } from "firebase/firestore"
 
 import { useAuth } from "@/components/auth-provider"
 import { Badge } from "@/components/ui/badge"
@@ -16,11 +17,12 @@ import {
   getAllReviews,
   getClinics,
   saveClinic,
+  updateBookingStatus,
 } from "@/lib/data"
 import { deleteFilter, getFilters, saveFilter, type Filter } from "@/lib/filters"
 import { deleteSpecialty, getSpecialties, saveSpecialty, type Specialty } from "@/lib/specialties"
 import { getFriendlyFirebaseError } from "@/lib/firebase-errors"
-import type { Booking, Clinic, Review, UserProfile } from "@/lib/types"
+import type { Booking, BookingStatus, Clinic, Review, UserProfile } from "@/lib/types"
 import { getUsers } from "@/lib/users"
 import { iconMap } from "@/components/search-section"
 import { egyptLocations } from "@/lib/egypt-locations"
@@ -47,6 +49,8 @@ type ClinicForm = {
   governorate: string
   city: string
   street: string
+  streetAr: string
+  allowsHomeVisit: boolean
 }
 
 const emptyClinic: ClinicForm = {
@@ -64,6 +68,8 @@ const emptyClinic: ClinicForm = {
   governorate: "",
   city: "",
   street: "",
+  streetAr: "",
+  allowsHomeVisit: false,
 }
 
 export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) {
@@ -82,8 +88,10 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
   const [isSaving, setIsSaving] = React.useState(false)
   const [isUploading, setIsUploading] = React.useState(false)
   const [isLoadingData, setIsLoadingData] = React.useState(true)
+  const [activeTab, setActiveTab] = React.useState<"clinics" | "queue" | "settings">("clinics")
 
   const d = dict.admin
+  const isArabic = locale === "ar"
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
@@ -205,6 +213,8 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
       governorate: clinic.governorate || "",
       city: clinic.city || "",
       street: clinic.street || "",
+      streetAr: clinic.streetAr || "",
+      allowsHomeVisit: !!clinic.allowsHomeVisit,
     })
   }
 
@@ -229,7 +239,10 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
         governorate: form.governorate,
         city: form.city,
         street: form.street,
+        streetAr: form.streetAr,
+        allowsHomeVisit: form.allowsHomeVisit,
         location: `${form.street}, ${form.city}, ${form.governorate}`,
+        locationAr: `${form.streetAr}, ${egyptLocations.find(g => g.name === form.governorate)?.cities.find(c => c.name === form.city)?.nameAr || form.city}, ${egyptLocations.find(g => g.name === form.governorate)?.nameAr || form.governorate}`,
       })
       setForm(emptyClinic)
       await loadDashboard()
@@ -294,6 +307,16 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
         [key]: !prev.accessibility[key]
       }
     }))
+  }
+
+  const handleStatusUpdate = async (bookingId: string, status: BookingStatus) => {
+    try {
+      const checkInTime = status === "checked-in" ? serverTimestamp() : null
+      await updateBookingStatus(bookingId, status, checkInTime)
+      await loadDashboard()
+    } catch (err) {
+      setError("Failed to update status")
+    }
   }
 
   const handleDeleteClinic = async (id: string) => {
@@ -375,8 +398,7 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
     }
   };
 
-  return (
-    <section className="container mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-10">
+  return <section className="container mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-10">
       <div className="space-y-6">
         <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2">
@@ -423,11 +445,33 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
           })}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
-          <Card className="rounded-md border-border/80 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-base">{d.clinicsTitle}</CardTitle>
-            </CardHeader>
+        <div className="flex border-b border-border">
+          <button
+            onClick={() => setActiveTab("clinics")}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "clinics" ? "border-b-2 border-primary text-primary" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            {isArabic ? "العيادات" : "Clinics"}
+          </button>
+          <button
+            onClick={() => setActiveTab("queue")}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "queue" ? "border-b-2 border-primary text-primary" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            {isArabic ? "إدارة الدور" : "Queue Manager"}
+          </button>
+          <button
+            onClick={() => setActiveTab("settings")}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "settings" ? "border-b-2 border-primary text-primary" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            {isArabic ? "الإعدادات" : "Settings"}
+          </button>
+        </div>
+
+        {activeTab === "clinics" &&
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
+            <Card className="rounded-md border-border/80 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-base">{d.clinicsTitle}</CardTitle>
+              </CardHeader>
             <CardContent className="space-y-3">
               {clinics.length === 0 ? (
                 <div className="rounded-md bg-muted/20 p-5">
@@ -528,7 +572,7 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Governorate</label>
                       <select
-                        value={form.governorate}
+                        value={form.governorate || ""}
                         onChange={(e) => setForm(prev => ({ ...prev, governorate: e.target.value, city: "" }))}
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         required
@@ -542,7 +586,7 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
                     <div className="space-y-2">
                       <label className="text-sm font-medium">City / Village</label>
                       <select
-                        value={form.city}
+                        value={form.city || ""}
                         onChange={(e) => setForm(prev => ({ ...prev, city: e.target.value }))}
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         disabled={!form.governorate}
@@ -555,14 +599,26 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
                       </select>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Street Address</label>
-                    <Input
-                      value={form.street}
-                      onChange={(e) => setForm(prev => ({ ...prev, street: e.target.value }))}
-                      placeholder="Street name, building number..."
-                      required
-                    />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Street Address (EN)</label>
+                      <Input
+                        value={form.street || ""}
+                        onChange={(e) => setForm(prev => ({ ...prev, street: e.target.value }))}
+                        placeholder="Street name, building number..."
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Street Address (AR)</label>
+                      <Input
+                        value={form.streetAr || ""}
+                        onChange={(e) => setForm(prev => ({ ...prev, streetAr: e.target.value }))}
+                        placeholder="اسم الشارع، رقم المبنى..."
+                        dir="rtl"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -626,6 +682,19 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
                     )}
                   </div>
                 </div>
+                <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-muted/20 p-3">
+                  <input 
+                    type="checkbox" 
+                    id="allowsHomeVisit" 
+                    checked={form.allowsHomeVisit}
+                    onChange={(e) => setForm(prev => ({ ...prev, allowsHomeVisit: e.target.checked }))}
+                    className="size-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <label htmlFor="allowsHomeVisit" className="text-sm font-bold">
+                    Provides Home Visit Services
+                  </label>
+                </div>
+
                 <div className="space-y-3">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{d.accessibilityFeatures}</label>
                   <div className="flex flex-wrap gap-2">
@@ -654,8 +723,85 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
             </CardContent>
           </Card>
         </div>
+      }
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
+      {activeTab === "queue" &&
+        <div className="space-y-6">
+          {clinics.map(clinic => {
+            const today = new Date().toISOString().split('T')[0]
+            const clinicBookings = bookings.filter(b => b.clinicId === clinic.id && b.date === today)
+            
+            if (clinicBookings.length === 0) return null
+
+            return (
+              <Card key={clinic.id} className="rounded-md border-border/80 shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg">{clinic.name}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{today}</p>
+                  </div>
+                  <Badge variant="outline">{clinicBookings.length} Bookings</Badge>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {clinicBookings
+                      .sort((a, b) => {
+                        // Sort by status priority then by time
+                        const statusOrder = { "in-progress": 0, "checked-in": 1, "confirmed": 2, "pending": 3, "completed": 4, "cancelled": 5 }
+                        return (statusOrder[a.status || "pending"] - statusOrder[b.status || "pending"]) || a.time.localeCompare(b.time)
+                      })
+                      .map(booking => (
+                        <div key={booking.id} className="flex items-center justify-between rounded-lg border p-4">
+                          <div className="flex items-center gap-4">
+                            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                              {booking.time.split(':')[0]}
+                            </div>
+                            <div>
+                              <p className="font-semibold">{booking.notes || "Patient"}</p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Clock className="size-3" /> {booking.time}
+                                <Badge variant="secondary" className="text-[10px] uppercase">
+                                  {booking.status || "pending"}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            {(booking.status === "pending" || booking.status === "confirmed" || !booking.status) && (
+                              <Button size="sm" onClick={() => handleStatusUpdate(booking.id, "checked-in")}>
+                                Check-in
+                              </Button>
+                            )}
+                            {booking.status === "checked-in" && (
+                              <Button size="sm" variant="default" onClick={() => handleStatusUpdate(booking.id, "in-progress")}>
+                                <Play className="size-3 mr-1" /> Start Visit
+                              </Button>
+                            )}
+                            {booking.status === "in-progress" && (
+                              <Button size="sm" variant="outline" className="text-emerald-600 border-emerald-200 hover:bg-emerald-50" onClick={() => handleStatusUpdate(booking.id, "completed")}>
+                                Complete
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+          {bookings.filter(b => b.date === new Date().toISOString().split('T')[0]).length === 0 && (
+            <div className="text-center py-20 bg-muted/10 rounded-xl border border-dashed">
+              <CalendarCheck className="size-12 text-muted-foreground mx-auto mb-4 opacity-20" />
+              <p className="text-muted-foreground">No bookings scheduled for today.</p>
+            </div>
+          )}
+        </div>
+      }
+
+      {activeTab === "settings" &&
+        <div className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
           <Card className="rounded-md border-border/80 shadow-sm">
             <CardHeader>
               <CardTitle className="text-base">{d.filters.title}</CardTitle>
@@ -840,8 +986,9 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
           }))} />
         </div>
       </div>
-    </section>
-  )
+      }
+    </div>
+  </section>
 }
 
 function ActivityList({
