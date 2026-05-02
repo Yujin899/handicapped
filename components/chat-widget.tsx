@@ -79,7 +79,7 @@ function parseMessageText(text: string) {
   return parts
 }
 
-function ClinicCardInline({ id, isArabic, locale }: { id: string, isArabic: boolean, locale: string }) {
+function ClinicCardInline({ id, isArabic, locale, onBookNow }: { id: string, isArabic: boolean, locale: string, onBookNow?: () => void }) {
   const clinic = mockClinics.find(c => c.id === id)
   if (!clinic) return null
 
@@ -106,6 +106,7 @@ function ClinicCardInline({ id, isArabic, locale }: { id: string, isArabic: bool
         <span className="text-xs text-muted-foreground flex items-center gap-1">📍 {isArabic ? clinic.locationAr : clinic.location}</span>
         <Link 
           href={`/${locale}/clinics/${clinic.id}`}
+          onClick={onBookNow}
           className="rounded-lg bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90"
         >
           {isArabic ? "احجز الآن" : "Book Now"}
@@ -118,7 +119,7 @@ function ClinicCardInline({ id, isArabic, locale }: { id: string, isArabic: bool
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ChatWidget({ locale }: { locale: string }) {
-  const { profile } = useAuth()
+  const { currentUser, profile } = useAuth()
   const [isOpen, setIsOpen] = React.useState(false)
   const [freeTextMode, setFreeTextMode] = React.useState(false)
   const [messages, setMessages] = React.useState<Message[]>([])
@@ -249,9 +250,15 @@ export function ChatWidget({ locale }: { locale: string }) {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: 12, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            exit={{ opacity: 0, y: 12, scale: 0.96 }}
+            transition={{ 
+              type: "spring", 
+              damping: 25, 
+              stiffness: 300,
+              mass: 0.8
+            }}
             className={cn(
               "mb-4 w-[calc(100vw-2rem)] sm:w-[400px] md:w-[440px]",
               isArabic ? "origin-bottom-left" : "origin-bottom-right"
@@ -333,7 +340,7 @@ export function ChatWidget({ locale }: { locale: string }) {
                       )}
                       {m.role === "user" && (
                         <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full border border-border shadow mb-1">
-                          <Image src={profile?.photoURL || "/profile.png"} alt="User" fill className="object-cover" />
+                          <Image src={profile?.photoURL || currentUser?.photoURL || "/profile.png"} alt="User" fill className="object-cover" />
                         </div>
                       )}
                       <div
@@ -348,7 +355,7 @@ export function ChatWidget({ locale }: { locale: string }) {
                           m.content ? parseMessageText(m.content).map((part, i) => {
                             if (part.startsWith("[CLINIC_CARD:") && part.endsWith("]")) {
                               const id = part.slice(13, -1)
-                              return <ClinicCardInline key={i} id={id} isArabic={isArabic} locale={locale} />
+                              return <ClinicCardInline key={i} id={id} isArabic={isArabic} locale={locale} onBookNow={() => setIsOpen(false)} />
                             }
                             return <React.Fragment key={i}>{part}</React.Fragment>
                           }) : (
@@ -465,20 +472,20 @@ export function ChatWidget({ locale }: { locale: string }) {
           {isOpen ? (
             <motion.span
               key="close"
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.18 }}
+              initial={{ rotate: -45, opacity: 0, scale: 0.8 }}
+              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+              exit={{ rotate: 45, opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
               <X className="h-6 w-6" />
             </motion.span>
           ) : (
             <motion.span
               key="open"
-              initial={{ rotate: 90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: -90, opacity: 0 }}
-              transition={{ duration: 0.18 }}
+              initial={{ rotate: 45, opacity: 0, scale: 0.8 }}
+              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+              exit={{ rotate: -45, opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
               <MessageCircle className="h-6 w-6" />
             </motion.span>

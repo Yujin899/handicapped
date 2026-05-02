@@ -13,7 +13,7 @@ export function Header({ dict, locale }: { dict: any; locale: string }) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = React.useState(false);
   const { theme, setTheme } = useTheme();
-  const { currentUser } = useAuth();
+  const { currentUser, profile } = useAuth();
 
   const switchLanguage = (newLocale: string) => {
     if (newLocale === locale) return;
@@ -78,11 +78,21 @@ export function Header({ dict, locale }: { dict: any; locale: string }) {
               </div>
             )}
           </div>
-          <div className="hidden lg:block">
+          <div className="hidden lg:flex items-center gap-4">
             {currentUser ? (
-              <Button variant="ghost" className="font-bold text-xs uppercase tracking-widest" onClick={() => void logout()}>
-                {dict.actions.logout}
-              </Button>
+              <div className="flex items-center gap-3">
+                <Link href={`/${locale}/profile`} className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-primary/20 hover:border-primary/50 transition-colors shadow-sm">
+                  <Image 
+                    src={profile?.photoURL || currentUser.photoURL || "/profile.png"} 
+                    alt={profile?.name || currentUser.displayName || "User"} 
+                    fill 
+                    className="object-cover" 
+                  />
+                </Link>
+                <Button variant="ghost" className="font-bold text-[10px] uppercase tracking-widest px-2 h-9" onClick={() => void logout()}>
+                  {dict.actions.logout}
+                </Button>
+              </div>
             ) : (
               <Link href={`/${locale}/login`}>
                 <Button variant="ghost" className="font-bold text-xs uppercase tracking-widest">{dict.actions.login}</Button>
@@ -126,16 +136,32 @@ export function Header({ dict, locale }: { dict: any; locale: string }) {
               </Button>
             </div>
             {currentUser ? (
-              <button
-                type="button"
-                className="p-3 min-h-[44px] flex items-center rounded-lg hover:bg-muted transition-colors duration-200 border-t mt-2 text-left"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  void logout();
-                }}
-              >
-                {dict.actions.logout}
-              </button>
+              <div className="space-y-2 mt-2 pt-2 border-t border-border/50">
+                <div className="flex items-center gap-3 px-3 py-2">
+                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border shadow-sm">
+                    <Image 
+                      src={profile?.photoURL || currentUser.photoURL || "/profile.png"} 
+                      alt="User" 
+                      fill 
+                      className="object-cover" 
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold truncate max-w-[200px]">{profile?.name || currentUser.displayName || "User"}</span>
+                    <span className="text-[10px] text-muted-foreground truncate max-w-[200px]">{currentUser.email}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="w-full p-3 min-h-[44px] flex items-center rounded-lg hover:bg-muted transition-colors duration-200 text-left font-semibold text-destructive"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    void logout();
+                  }}
+                >
+                  {dict.actions.logout}
+                </button>
+              </div>
             ) : (
               <Link href={`/${locale}/login`} className="p-3 min-h-[44px] flex items-center rounded-lg hover:bg-muted transition-colors duration-200 border-t mt-2" onClick={() => setIsMenuOpen(false)}>{dict.actions.login}</Link>
             )}
