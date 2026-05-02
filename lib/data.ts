@@ -60,6 +60,7 @@ export async function createBooking(input: CreateBookingInput) {
     userId: input.userId,
     clinicId: input.clinicId,
     clinicName: input.clinicName,
+    clinicNameAr: input.clinicNameAr || "",
     date: input.date,
     time: input.time,
     notes: input.notes,

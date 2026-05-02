@@ -51,6 +51,7 @@ export type Booking = {
   userId: string
   clinicId: string
   clinicName: string
+  clinicNameAr?: string
   date: string
   time: string
   notes: string

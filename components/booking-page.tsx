@@ -88,6 +88,7 @@ export function BookingPage({
   const [error, setError] = React.useState("")
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [firestoreClinicName, setFirestoreClinicName] = React.useState("")
+  const [firestoreClinicNameAr, setFirestoreClinicNameAr] = React.useState("")
   const [allowsHomeVisit, setAllowsHomeVisit] = React.useState(false)
   const [visitType, setVisitType] = React.useState<"clinic" | "home">("clinic")
   const [patientAddress, setPatientAddress] = React.useState("")
@@ -102,9 +103,13 @@ export function BookingPage({
     getClinicById(clinicId)
       .then((clinic) => {
         setFirestoreClinicName(clinic?.name ?? "")
+        setFirestoreClinicNameAr(clinic?.nameAr ?? "")
         setAllowsHomeVisit(!!clinic?.allowsHomeVisit)
       })
-      .catch(() => setFirestoreClinicName(""))
+      .catch(() => {
+        setFirestoreClinicName("")
+        setFirestoreClinicNameAr("")
+      })
   }, [clinicId])
 
   const selectedDateLabel =
@@ -149,6 +154,7 @@ export function BookingPage({
         userId: currentUser.uid,
         clinicId,
         clinicName,
+        clinicNameAr: firestoreClinicNameAr,
         date: selectedDate,
         time: selectedTime,
         notes: note.trim(),
@@ -160,7 +166,7 @@ export function BookingPage({
 
       const params = new URLSearchParams({
         id: bookingId,
-        clinic: clinicName,
+        clinic: isArabic ? (firestoreClinicNameAr || clinicName) : clinicName,
         date: selectedDateLabel,
         time: selectedTime,
         note: note.trim(),

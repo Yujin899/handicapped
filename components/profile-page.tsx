@@ -372,9 +372,9 @@ export function ProfilePage({ locale, dict }: { locale: string, dict: any }) {
                   <div key={booking.id} className="space-y-3 rounded-md border border-border/80 p-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <p className="font-semibold">{booking.clinicName}</p>
+                        <p className="font-semibold">{isArabic ? (booking.clinicNameAr || booking.clinicName) : booking.clinicName}</p>
                         <p className="mt-1 text-sm text-muted-foreground">
-                          {booking.date} at {booking.time}
+                          {booking.date} {isArabic ? "في" : "at"} {booking.time}
                         </p>
                       </div>
                       <Badge variant="secondary" className="rounded-md">

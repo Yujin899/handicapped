@@ -50,10 +50,10 @@ export default async function RootLayout({
       className={`${inter.variable} ${ibmPlexSansArabic.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col font-sans transition-colors duration-300">
+      <body className={`min-h-full flex flex-col ${isArabic ? ibmPlexSansArabic.className : inter.className} transition-colors duration-300`}>
         <ThemeProvider>
           <AuthProvider>
-            <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/10">
+            <div className={`min-h-screen bg-background text-foreground flex flex-col selection:bg-primary/10 ${isArabic ? ibmPlexSansArabic.className : inter.className}`}>
               <Header dict={dict} locale={locale} />
               <main className="flex-1">
                 {children}

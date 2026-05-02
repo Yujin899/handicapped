@@ -8,16 +8,19 @@ import Link from 'next/link';
 import { Badge, Button, ClinicCard } from './shared-ui';
 import { SearchSection } from './search-section';
 import { getClinics } from '@/lib/data';
+import { getFilters, type Filter } from '@/lib/filters';
 import type { Clinic } from '@/lib/types';
 
 export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
   const [topClinics, setTopClinics] = React.useState<Clinic[]>([]);
+  const [availableFilters, setAvailableFilters] = React.useState<Filter[]>([]);
 
   React.useEffect(() => {
     getClinics().then(allClinics => {
       const sorted = [...allClinics].sort((a, b) => (b.rating || 0) - (a.rating || 0));
       setTopClinics(sorted.slice(0, 3));
     });
+    getFilters().then(setAvailableFilters);
   }, []);
   const fadeIn: Variants = {
     hidden: { opacity: 0, y: 10 },
@@ -128,14 +131,16 @@ export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
                   rating: (clinic.rating || 0).toFixed(1),
                   type: locale === 'ar' ? clinic.specialtyAr || clinic.specialty || "رعاية صحية" : clinic.specialty || "Healthcare",
                   imageSrc: clinic.imageSrc,
+                  homeVisitAvailable: clinic.allowsHomeVisit,
                   badges: Object.entries(clinic.accessibility || {})
                     .filter(([, value]) => value === true)
                     .map(([key]) => {
-                      if (key === 'wheelchair') return locale === 'ar' ? 'وصول الكراسي' : 'Wheelchair';
-                      if (key === 'hearing') return locale === 'ar' ? 'دعم السمع' : 'Hearing';
-                      if (key === 'quiet') return locale === 'ar' ? 'بيئة هادئة' : 'Quiet';
-                      if (key === 'visual') return locale === 'ar' ? 'مساعدة بصرية' : 'Visual';
-                      return key;
+                      const filter = availableFilters.find(f => f.id === key);
+                      return {
+                        id: key,
+                        label: locale === 'ar' ? filter?.labelAr || filter?.label || key : filter?.label || key,
+                        icon: filter?.icon || 'Accessibility'
+                      };
                     })
                 };
                 return (

@@ -3,7 +3,11 @@
 import React, { memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Activity, Star } from 'lucide-react';
+import { 
+  Activity, Star, Ear, VolumeX, Accessibility, Eye, Wind, Heart, User, Shield, Info,
+  Brain, Baby, Dog, Clock, MessageCircle, Smile, Hand, Phone, Stethoscope, 
+  Navigation, Map, Locate, Zap, Sun, Moon, Cloud, Bell, Camera, Mic
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Slot } from "radix-ui";
 
@@ -28,6 +32,12 @@ export const Wheelchair = memo((props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 ));
 Wheelchair.displayName = "Wheelchair";
+
+export const iconMap: Record<string, React.ElementType> = {
+  Wheelchair, Ear, VolumeX, Accessibility, Eye, Wind, Heart, User, Shield, Info,
+  Brain, Baby, Dog, Clock, MessageCircle, Smile, Hand, Phone, Stethoscope,
+  Navigation, Map, Locate, Zap, Sun, Moon, Cloud, Bell, Camera, Mic
+};
 
 export const GoogleIcon = memo((props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -126,7 +136,7 @@ export const Badge = memo(({ className, variant = 'default', ...props }: React.H
 });
 Badge.displayName = "Badge";
 
-export const ClinicCard = memo(({ clinic, dict, locale }: { clinic: { id: string, name: string, rating: string, type: string, badges: string[], imageSrc?: string }, dict: any, locale: string }) => (
+export const ClinicCard = memo(({ clinic, dict, locale }: { clinic: { id: string, name: string, rating: string, type: string, badges: { id: string, label: string, icon: string }[], imageSrc?: string, homeVisitAvailable?: boolean }, dict: any, locale: string }) => (
   <Link href={`/${locale}/clinics/${clinic.id}`} className="block h-full">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -150,13 +160,20 @@ export const ClinicCard = memo(({ clinic, dict, locale }: { clinic: { id: string
           )}
         </div>
         <div className="absolute top-4 left-4 flex flex-col gap-2">
+          {clinic.homeVisitAvailable && (
+            <div className="bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-lg">
+              {locale === 'ar' ? "زيارة منزلية متاحة" : "Home Visit Available"}
+            </div>
+          )}
         </div>
       </div>
       <CardHeader className="pb-4 pt-8 px-8">
         <div className="flex justify-between items-start gap-4">
-          <div className="space-y-2">
-            <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{clinic.type}</span>
-            <CardTitle className="text-2xl font-bold group-hover:text-primary transition-colors leading-tight">{clinic.name}</CardTitle>
+          <div className="space-y-3">
+            <Badge variant="outline" className="rounded-md font-bold text-xs">
+              {clinic.type}
+            </Badge>
+            <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors leading-tight">{clinic.name}</CardTitle>
           </div>
           <motion.div 
             whileHover={{ scale: 1.1, rotate: 5 }}
@@ -169,11 +186,15 @@ export const ClinicCard = memo(({ clinic, dict, locale }: { clinic: { id: string
       </CardHeader>
       <CardContent className="flex-1 pb-8 px-8">
         <div className="flex flex-wrap gap-2.5 mb-6">
-          {clinic.badges.map((b) => (
-            <Badge key={b} variant="secondary" className="bg-primary/5 text-primary border-primary/10 text-[11px] font-black py-1 px-2.5 rounded-lg group-hover:bg-primary/10 transition-colors">
-              {b}
-            </Badge>
-          ))}
+          {clinic.badges.map((b) => {
+            const Icon = iconMap[b.icon] || Accessibility;
+            return (
+              <Badge key={b.id} variant="secondary" className="gap-1.5 bg-primary/5 text-primary border-primary/10 text-[11px] font-black py-1 px-2.5 rounded-lg group-hover:bg-primary/10 transition-colors">
+                <Icon className="size-3.5" />
+                {b.label}
+              </Badge>
+            );
+          })}
         </div>
         <p className="text-muted-foreground text-base leading-relaxed">
           {dict.clinics.communityVerified}

@@ -82,7 +82,11 @@ export function QueueStatus({ booking, locale, allBookings }: QueueStatusProps) 
           
           <div className="text-right">
             <Badge variant={isMyTurn ? "default" : "outline"} className={isMyTurn ? "bg-emerald-500 hover:bg-emerald-600" : ""}>
-              {booking.status || "pending"}
+              {booking.status === "pending" ? (isArabic ? "قيد الانتظار" : "Pending") : 
+               booking.status === "confirmed" ? (isArabic ? "مؤكد" : "Confirmed") :
+               booking.status === "checked-in" ? (isArabic ? "تم تسجيل الوصول" : "Checked In") :
+               booking.status === "in-progress" ? (isArabic ? "جارٍ" : "In Progress") :
+               (booking.status || (isArabic ? "قيد الانتظار" : "Pending"))}
             </Badge>
             {!isMyTurn && patientsAhead > 0 && (
                <div className="mt-1 flex items-center justify-end gap-1 text-xs text-muted-foreground">
