@@ -3,16 +3,23 @@ import {
   signInWithEmailAndPassword,
   signOut,
   GoogleAuthProvider,
-  signInWithRedirect,
+  signInWithPopup,
+  setPersistence,
+  browserLocalPersistence,
 } from "firebase/auth"
 
 import { auth } from "@/lib/firebase"
 import { ensureUserDocument, updateUserProfile } from "@/lib/users"
 
+// Force local persistence to ensure session survives redirects
+setPersistence(auth, browserLocalPersistence).catch(err => {
+  console.error("Failed to set persistence", err)
+})
+
 const googleProvider = new GoogleAuthProvider()
 
 export async function loginWithGoogle() {
-  return await signInWithRedirect(auth, googleProvider)
+  return await signInWithPopup(auth, googleProvider)
 }
 
 export async function signUpWithEmail(email: string, password: string, name = "") {

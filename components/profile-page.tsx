@@ -25,6 +25,9 @@ export function ProfilePage({ locale, dict }: { locale: string, dict: any }) {
   const { currentUser, profile, loading, refreshProfile } = useAuth()
   const [name, setName] = React.useState("")
   const [preferences, setPreferences] = React.useState<string[]>([])
+  const [medicalConditions, setMedicalConditions] = React.useState<string[]>([])
+  const [customPrefInput, setCustomPrefInput] = React.useState("")
+  const [customCondInput, setCustomCondInput] = React.useState("")
   const [availableFilters, setAvailableFilters] = React.useState<Filter[]>([])
   const [bookings, setBookings] = React.useState<Booking[]>([])
   const [allBookings, setAllBookings] = React.useState<Booking[]>([])
@@ -51,6 +54,7 @@ export function ProfilePage({ locale, dict }: { locale: string, dict: any }) {
     const timeoutId = window.setTimeout(() => {
       setName(profile?.name ?? "")
       setPreferences(profile?.accessibilityPreferences ?? [])
+      setMedicalConditions(profile?.medicalConditions ?? [])
       setPhotoURL(profile?.photoURL ?? "/profile.png")
     }, 0)
 
@@ -76,6 +80,36 @@ export function ProfilePage({ locale, dict }: { locale: string, dict: any }) {
         : [...current, preference]
     )
   }
+
+  const toggleCondition = (condition: string) => {
+    setMedicalConditions((current) =>
+      current.includes(condition)
+        ? current.filter((item) => item !== condition)
+        : [...current, condition]
+    )
+  }
+
+  const addCustomPreference = () => {
+    if (!customPrefInput.trim()) return
+    const val = customPrefInput.trim()
+    if (!preferences.includes(val)) {
+      setPreferences(prev => [...prev, val])
+    }
+    setCustomPrefInput("")
+  }
+
+  const addCustomCondition = () => {
+    if (!customCondInput.trim()) return
+    const val = customCondInput.trim()
+    if (!medicalConditions.includes(val)) {
+      setMedicalConditions(prev => [...prev, val])
+    }
+    setCustomCondInput("")
+  }
+
+  const predefinedConditions = [
+    "diabetes", "hypertension", "cardiac", "asthma", "epilepsy", "kidney", "arthritis"
+  ]
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -123,6 +157,7 @@ export function ProfilePage({ locale, dict }: { locale: string, dict: any }) {
       await updateUserProfile(currentUser.uid, {
         name: name.trim(),
         accessibilityPreferences: preferences,
+        medicalConditions: medicalConditions,
         photoURL: photoURL,
       })
       await refreshProfile()
@@ -234,6 +269,73 @@ export function ProfilePage({ locale, dict }: { locale: string, dict: any }) {
                         {locale === 'ar' ? filter.labelAr || filter.label : filter.label}
                       </Button>
                     ))}
+                    {/* Render custom preferences that are not in the predefined list */}
+                    {preferences.filter(p => !availableFilters.some(f => f.id === p)).map(p => (
+                      <Button
+                        key={p}
+                        type="button"
+                        variant="default"
+                        className="h-11 rounded-md"
+                        onClick={() => togglePreference(p)}
+                      >
+                        {p} ×
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="flex gap-2 max-w-sm">
+                    <Input 
+                      placeholder={isArabic ? "إضافة احتياج مخصص..." : "Add custom need..."}
+                      value={customPrefInput}
+                      onChange={(e) => setCustomPrefInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomPreference())}
+                    />
+                    <Button type="button" variant="outline" onClick={addCustomPreference}>{isArabic ? "إضافة" : "Add"}</Button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">{d.medicalConditions || "Medical Conditions"}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { id: "diabetes", label: dict.onboarding.conditionDiabetes },
+                      { id: "hypertension", label: dict.onboarding.conditionHypertension },
+                      { id: "cardiac", label: dict.onboarding.conditionCardiac },
+                      { id: "asthma", label: dict.onboarding.conditionAsthma },
+                      { id: "epilepsy", label: dict.onboarding.conditionEpilepsy },
+                      { id: "kidney", label: dict.onboarding.conditionKidney },
+                      { id: "arthritis", label: dict.onboarding.conditionArthritis },
+                    ].map((item) => (
+                      <Button
+                        key={item.id}
+                        type="button"
+                        variant={medicalConditions.includes(item.id) ? "default" : "outline"}
+                        className="h-11 rounded-md"
+                        onClick={() => toggleCondition(item.id)}
+                      >
+                        {item.label}
+                      </Button>
+                    ))}
+                    {/* Render custom conditions */}
+                    {medicalConditions.filter(c => !predefinedConditions.includes(c)).map(c => (
+                      <Button
+                        key={c}
+                        type="button"
+                        variant="default"
+                        className="h-11 rounded-md"
+                        onClick={() => toggleCondition(c)}
+                      >
+                        {c} ×
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="flex gap-2 max-w-sm">
+                    <Input 
+                      placeholder={isArabic ? "إضافة حالة مخصصة..." : "Add custom condition..."}
+                      value={customCondInput}
+                      onChange={(e) => setCustomCondInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomCondition())}
+                    />
+                    <Button type="button" variant="outline" onClick={addCustomCondition}>{isArabic ? "إضافة" : "Add"}</Button>
                   </div>
                 </div>
 

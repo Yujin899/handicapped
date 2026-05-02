@@ -2,15 +2,15 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { signUpWithEmail, loginWithGoogle } from "@/lib/auth";
-import { auth } from "@/lib/firebase";
 import { getFriendlyFirebaseError } from "@/lib/firebase-errors";
 import { updateAccessibilityPreferences, ensureUserDocument } from "@/lib/users";
-import { getRedirectResult } from "firebase/auth";
 import { GoogleIcon } from "./shared-ui";
+import { useAuth } from "./auth-provider";
+import { Loader2 } from "lucide-react";
 
 export function SignupPage({ locale, dict }: { locale: string; dict: Record<string, any> }) {
   const router = useRouter();
@@ -21,29 +21,26 @@ export function SignupPage({ locale, dict }: { locale: string; dict: Record<stri
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = React.useState(false);
 
-  React.useEffect(() => {
-    const handleRedirect = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result) {
-          setIsGoogleSubmitting(true);
-          await handlePostLogin(result.user.uid);
-          const { isNew } = await ensureUserDocument(result.user, result.user.displayName || "");
-          if (isNew) {
-            router.push(`/${locale}/onboarding`);
-          } else {
-            router.push(`/${locale}`);
-          }
-        }
-      } catch (err) {
-        setError(getFriendlyFirebaseError(err));
-      } finally {
-        setIsGoogleSubmitting(false);
-      }
-    };
+  const { currentUser, loading: authLoading } = useAuth();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") ?? `/${locale}`;
 
-    handleRedirect();
-  }, [locale, router]);
+  React.useEffect(() => {
+    if (!authLoading && currentUser && !isGoogleSubmitting && !isSubmitting) {
+      router.push(redirectTo);
+    }
+  }, [currentUser, authLoading, isGoogleSubmitting, isSubmitting, router, redirectTo]);
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-sm font-medium text-muted-foreground">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -56,7 +53,7 @@ export function SignupPage({ locale, dict }: { locale: string; dict: Record<stri
       if (isNew) {
         router.push(`/${locale}/onboarding`);
       } else {
-        router.push(`/${locale}`);
+        router.push(redirectTo);
       }
     } catch (err) {
       setError(getFriendlyFirebaseError(err));
@@ -70,10 +67,17 @@ export function SignupPage({ locale, dict }: { locale: string; dict: Record<stri
     setIsGoogleSubmitting(true);
 
     try {
-      await loginWithGoogle();
-      // Browser will redirect
+      const result = await loginWithGoogle();
+      await handlePostLogin(result.user.uid);
+      const { isNew } = await ensureUserDocument(result.user, result.user.displayName || "");
+      if (isNew) {
+        router.push(`/${locale}/onboarding`);
+      } else {
+        router.push(redirectTo);
+      }
     } catch (err) {
       setError(getFriendlyFirebaseError(err));
+    } finally {
       setIsGoogleSubmitting(false);
     }
   };

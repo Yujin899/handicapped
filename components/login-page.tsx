@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { loginWithEmail, loginWithGoogle } from "@/lib/auth";
 import { auth } from "@/lib/firebase";
-import { ensureUserDocument } from "@/lib/users";
+import { ensureUserDocument, updateAccessibilityPreferences } from "@/lib/users";
 import { getFriendlyFirebaseError } from "@/lib/firebase-errors";
-import { getRedirectResult } from "firebase/auth";
 import { GoogleIcon } from "./shared-ui";
+import { useAuth } from "./auth-provider";
+import { Loader2 } from "lucide-react";
 
 export function LoginPage({ locale, dict }: { locale: string; dict: Record<string, any> }) {
   const router = useRouter();
@@ -22,30 +23,36 @@ export function LoginPage({ locale, dict }: { locale: string; dict: Record<strin
   const [isGoogleSubmitting, setIsGoogleSubmitting] = React.useState(false);
 
   const redirectTo = searchParams.get("redirect") ?? `/${locale}`;
-  const [loadingRedirect, setLoadingRedirect] = React.useState(true);
+  const { currentUser, loading: authLoading } = useAuth();
+
+  const handlePostLogin = async (uid: string) => {
+    const pendingPreferences = window.localStorage.getItem("pendingAccessibilityPreferences");
+    if (pendingPreferences) {
+      try {
+        await updateAccessibilityPreferences(uid, JSON.parse(pendingPreferences));
+        window.localStorage.removeItem("pendingAccessibilityPreferences");
+      } catch (e) {
+        console.error("Failed to update pending preferences", e);
+      }
+    }
+  };
 
   React.useEffect(() => {
-    const handleRedirect = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result) {
-          setIsGoogleSubmitting(true);
-          const { isNew } = await ensureUserDocument(result.user, result.user.displayName || "");
-          if (isNew) {
-            router.push(`/${locale}/onboarding`);
-          } else {
-            router.push(redirectTo);
-          }
-        }
-      } catch (err) {
-        setError(getFriendlyFirebaseError(err));
-      } finally {
-        setLoadingRedirect(false);
-      }
-    };
+    if (!authLoading && currentUser && !isGoogleSubmitting && !isSubmitting) {
+      router.push(redirectTo);
+    }
+  }, [currentUser, authLoading, isGoogleSubmitting, isSubmitting, router, redirectTo]);
 
-    handleRedirect();
-  }, [locale, router, redirectTo]);
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-sm font-medium text-muted-foreground">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -71,10 +78,17 @@ export function LoginPage({ locale, dict }: { locale: string; dict: Record<strin
     setIsGoogleSubmitting(true);
 
     try {
-      await loginWithGoogle();
-      // Browser will redirect, so no need to push router here
+      const result = await loginWithGoogle();
+      await handlePostLogin(result.user.uid);
+      const { isNew } = await ensureUserDocument(result.user, result.user.displayName || "");
+      if (isNew) {
+        router.push(`/${locale}/onboarding`);
+      } else {
+        router.push(redirectTo);
+      }
     } catch (err) {
       setError(getFriendlyFirebaseError(err));
+    } finally {
       setIsGoogleSubmitting(false);
     }
   };
