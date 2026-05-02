@@ -202,7 +202,7 @@ export function ProfilePage({ locale, dict }: { locale: string, dict: any }) {
               <form className="space-y-6" onSubmit={handleSave}>
                 <div className="flex flex-col items-center gap-6 md:flex-row">
                   <div className="relative group">
-                    <div className="relative size-32 overflow-hidden rounded-full border-4 border-background shadow-xl">
+                    <div className="relative size-32 overflow-hidden rounded-full border-4 border-background shadow-md">
                       <Image 
                         src={photoURL || "/profile.png"} 
                         alt="Profile" 

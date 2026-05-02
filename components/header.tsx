@@ -14,6 +14,7 @@ export function Header({ dict, locale }: { dict: any; locale: string }) {
   const [isLangDropdownOpen, setIsLangDropdownOpen] = React.useState(false);
   const { theme, setTheme } = useTheme();
   const { currentUser, profile } = useAuth();
+  const isArabic = locale === 'ar';
 
   const switchLanguage = (newLocale: string) => {
     if (newLocale === locale) return;
@@ -39,6 +40,9 @@ export function Header({ dict, locale }: { dict: any; locale: string }) {
           <Link href={`/${locale}`} className="text-foreground transition-colors hover:text-primary">{dict.nav.home}</Link>
           <Link href={`/${locale}/clinics`} className="transition-colors hover:text-primary">{dict.nav.explore}</Link>
           <Link href={currentUser ? `/${locale}/profile` : `/${locale}/login`} className="transition-colors hover:text-primary">{dict.nav.profile}</Link>
+          {profile?.role === 'admin' && (
+            <Link href={`/${locale}/admin`} className="transition-colors hover:text-primary font-black text-primary/80">{isArabic ? "لوحة التحكم" : "Admin"}</Link>
+          )}
         </nav>
 
         {/* Right Side: Actions */}
@@ -81,7 +85,7 @@ export function Header({ dict, locale }: { dict: any; locale: string }) {
           <div className="hidden lg:flex items-center gap-4">
             {currentUser ? (
               <div className="flex items-center gap-3">
-                <Link href={`/${locale}/profile`} className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-primary/20 hover:border-primary/50 transition-colors shadow-sm">
+                <Link href={`/${locale}/profile`} className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-background shadow-sm hover:border-primary/50 transition-colors">
                   <Image 
                     src={profile?.photoURL || currentUser.photoURL || "/profile.png"} 
                     alt={profile?.name || currentUser.displayName || "User"} 
@@ -127,6 +131,9 @@ export function Header({ dict, locale }: { dict: any; locale: string }) {
             <Link href={`/${locale}`} className="p-3 min-h-[44px] flex items-center rounded-lg hover:bg-muted transition-colors duration-200" onClick={() => setIsMenuOpen(false)}>{dict.nav.home}</Link>
             <Link href={`/${locale}/clinics`} className="p-3 min-h-[44px] flex items-center rounded-lg hover:bg-muted transition-colors duration-200" onClick={() => setIsMenuOpen(false)}>{dict.nav.explore}</Link>
             <Link href={currentUser ? `/${locale}/profile` : `/${locale}/login`} className="p-3 min-h-[44px] flex items-center rounded-lg hover:bg-muted transition-colors duration-200" onClick={() => setIsMenuOpen(false)}>{dict.nav.profile}</Link>
+            {profile?.role === 'admin' && (
+              <Link href={`/${locale}/admin`} className="p-3 min-h-[44px] flex items-center rounded-lg hover:bg-muted transition-colors duration-200 font-bold text-primary" onClick={() => setIsMenuOpen(false)}>{isArabic ? "لوحة التحكم" : "Admin Dashboard"}</Link>
+            )}
             <div className="flex gap-4 p-2">
               <Button variant="outline" size="sm" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="flex-1 h-11">
                 {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
@@ -138,7 +145,7 @@ export function Header({ dict, locale }: { dict: any; locale: string }) {
             {currentUser ? (
               <div className="space-y-2 mt-2 pt-2 border-t border-border/50">
                 <div className="flex items-center gap-3 px-3 py-2">
-                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border shadow-sm">
+                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-background shadow-sm">
                     <Image 
                       src={profile?.photoURL || currentUser.photoURL || "/profile.png"} 
                       alt="User" 

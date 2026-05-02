@@ -311,7 +311,7 @@ export function ChatWidget({ locale }: { locale: string }) {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex items-start gap-2.5"
                   >
-                    <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-border shadow">
+                    <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border-2 border-background shadow-sm">
                       <Image src="/mosaed.png" alt="Mosaed" fill className="object-cover" />
                     </div>
                     <div className="max-w-[80%] rounded-2xl rounded-tl-none bg-white border border-border/60 px-4 py-3 shadow-sm text-sm text-foreground leading-relaxed">
@@ -334,12 +334,12 @@ export function ChatWidget({ locale }: { locale: string }) {
                       )}
                     >
                       {m.role === "assistant" && (
-                        <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full border border-border shadow mb-1">
+                        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border-2 border-background shadow-sm mb-1">
                           <Image src="/mosaed.png" alt="Mosaed" fill className="object-cover" />
                         </div>
                       )}
                       {m.role === "user" && (
-                        <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full border border-border shadow mb-1">
+                        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border-2 border-background shadow-sm mb-1">
                           <Image src={profile?.photoURL || currentUser?.photoURL || "/profile.png"} alt="User" fill className="object-cover" />
                         </div>
                       )}

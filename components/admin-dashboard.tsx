@@ -228,8 +228,11 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
       await saveClinic({
         id,
         name: form.name.trim(),
+        nameAr: form.nameAr.trim(),
         specialty: form.specialty.trim(),
+        specialtyAr: form.specialtyAr.trim(),
         description: form.description.trim(),
+        descriptionAr: form.descriptionAr.trim(),
         imageSrc: form.images[0] || "",
         images: form.images,
         imageAlt: form.name.trim(),
@@ -570,21 +573,21 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
                 <div className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Governorate</label>
+                      <label className="text-sm font-medium">{isArabic ? "المحافظة" : "Governorate"}</label>
                       <select
                         value={form.governorate || ""}
                         onChange={(e) => setForm(prev => ({ ...prev, governorate: e.target.value, city: "" }))}
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         required
                       >
-                        <option value="">Select Governorate</option>
+                        <option value="">{isArabic ? "اختر المحافظة" : "Select Governorate"}</option>
                         {egyptLocations.map((gov) => (
                           <option key={gov.id} value={gov.name}>{locale === 'ar' ? gov.nameAr : gov.name}</option>
                         ))}
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">City / Village</label>
+                      <label className="text-sm font-medium">{isArabic ? "المدينة / القرية" : "City / Village"}</label>
                       <select
                         value={form.city || ""}
                         onChange={(e) => setForm(prev => ({ ...prev, city: e.target.value }))}
@@ -592,7 +595,7 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
                         disabled={!form.governorate}
                         required
                       >
-                        <option value="">Select City/Village</option>
+                        <option value="">{isArabic ? "اختر المدينة" : "Select City/Village"}</option>
                         {form.governorate && egyptLocations.find(g => g.name === form.governorate)?.cities.map((city) => (
                           <option key={city.id} value={city.name}>{locale === 'ar' ? city.nameAr : city.name}</option>
                         ))}
@@ -601,7 +604,7 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Street Address (EN)</label>
+                      <label className="text-sm font-medium">{isArabic ? "عنوان الشارع (EN)" : "Street Address (EN)"}</label>
                       <Input
                         value={form.street || ""}
                         onChange={(e) => setForm(prev => ({ ...prev, street: e.target.value }))}
@@ -610,7 +613,7 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Street Address (AR)</label>
+                      <label className="text-sm font-medium">{isArabic ? "عنوان الشارع (AR)" : "Street Address (AR)"}</label>
                       <Input
                         value={form.streetAr || ""}
                         onChange={(e) => setForm(prev => ({ ...prev, streetAr: e.target.value }))}
@@ -691,7 +694,7 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
                     className="size-4 rounded border-gray-300 text-primary focus:ring-primary"
                   />
                   <label htmlFor="allowsHomeVisit" className="text-sm font-bold">
-                    Provides Home Visit Services
+                    {isArabic ? "يوفر خدمات الزيارات المنزلية" : "Provides Home Visit Services"}
                   </label>
                 </div>
 
