@@ -150,16 +150,6 @@ export const ClinicCard = memo(({ clinic, dict, locale }: { clinic: { id: string
           )}
         </div>
         <div className="absolute top-4 left-4 flex flex-col gap-2">
-          {parseFloat(clinic.rating) >= 4.9 && (
-            <div className="bg-primary text-primary-foreground px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-lg shadow-primary/20 backdrop-blur-md">
-              {locale === 'ar' ? "الأكثر ملاءمة" : "Most Suitable"}
-            </div>
-          )}
-          {clinic.badges.some(b => b.toLowerCase().includes('wheelchair') || b.includes('كرسي')) && (
-            <div className="bg-white/90 text-foreground px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-lg backdrop-blur-md border border-border/50">
-              {locale === 'ar' ? "صديق للكراسي" : "Wheelchair Friendly"}
-            </div>
-          )}
         </div>
       </div>
       <CardHeader className="pb-4 pt-8 px-8">

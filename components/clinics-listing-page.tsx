@@ -447,16 +447,6 @@ export function ClinicsListingPage({
                         className="object-cover"
                       />
                       <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-                        {(clinic.rating ?? 0) >= 4.9 && (
-                          <div className="bg-primary text-primary-foreground px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider shadow-lg">
-                            {locale === 'ar' ? "الأكثر ملاءمة" : "Most Suitable"}
-                          </div>
-                        )}
-                         {clinic.accessibility?.wheelchair && (
-                          <div className="bg-white/90 text-foreground px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider shadow-sm border border-border/50">
-                            {locale === 'ar' ? "صديق للكراسي" : "Wheelchair Friendly"}
-                          </div>
-                        )}
                         {clinic.allowsHomeVisit && (
                           <div className="bg-emerald-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider shadow-lg">
                             {(dict.clinicListing as any).homeVisitBadge || (locale === 'ar' ? "زيارة منزلية متاحة" : "Home Visit Available")}
