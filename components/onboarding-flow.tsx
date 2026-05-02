@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth-provider";
 import { getFriendlyFirebaseError } from "@/lib/firebase-errors";
-import { updateAccessibilityPreferences } from "@/lib/users";
+import { updateAccessibilityPreferences, updateMedicalConditions } from "@/lib/users";
 import { getFilters, type Filter } from "@/lib/filters";
 
 export function OnboardingFlow({ locale, dict }: { locale: string; dict: Record<string, any> }) {
@@ -14,9 +14,20 @@ export function OnboardingFlow({ locale, dict }: { locale: string; dict: Record<
   const [step, setStep] = useState(1);
   const [userType, setUserType] = useState<string | null>(null);
   const [needs, setNeeds] = useState<string[]>([]);
+  const [conditions, setConditions] = useState<string[]>([]);
   const [availableFilters, setAvailableFilters] = useState<Filter[]>([]);
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+
+  const medicalConditionsList = [
+    { id: "diabetes", label: dict.onboarding.conditionDiabetes },
+    { id: "hypertension", label: dict.onboarding.conditionHypertension },
+    { id: "cardiac", label: dict.onboarding.conditionCardiac },
+    { id: "asthma", label: dict.onboarding.conditionAsthma },
+    { id: "epilepsy", label: dict.onboarding.conditionEpilepsy },
+    { id: "kidney", label: dict.onboarding.conditionKidney },
+    { id: "arthritis", label: dict.onboarding.conditionArthritis },
+  ];
 
   React.useEffect(() => {
     getFilters().then(setAvailableFilters);
@@ -31,19 +42,29 @@ export function OnboardingFlow({ locale, dict }: { locale: string; dict: Record<
     );
   };
 
+  const toggleCondition = (id: string) => {
+    setConditions((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    );
+  };
+
   const handleContinue = async () => {
     setError("");
     setIsSaving(true);
 
     try {
       if (currentUser) {
-        await updateAccessibilityPreferences(currentUser.uid, needs);
+        await Promise.all([
+          updateAccessibilityPreferences(currentUser.uid, needs),
+          updateMedicalConditions(currentUser.uid, conditions)
+        ]);
         await refreshProfile();
         router.push(`/${locale}`);
         return;
       }
 
       window.localStorage.setItem("pendingAccessibilityPreferences", JSON.stringify(needs));
+      window.localStorage.setItem("pendingMedicalConditions", JSON.stringify(conditions));
       router.push(`/${locale}/signup`);
     } catch (err) {
       setError(getFriendlyFirebaseError(err));
@@ -130,6 +151,37 @@ export function OnboardingFlow({ locale, dict }: { locale: string; dict: Record<
               <h1 className="text-3xl font-bold tracking-tight">{dict.onboarding.step3Title}</h1>
               <p className="text-muted-foreground">{dict.onboarding.step3Subtitle}</p>
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {medicalConditionsList.map((item) => {
+                const isSelected = conditions.includes(item.id);
+                return (
+                  <Button
+                    key={item.id}
+                    variant={isSelected ? "default" : "outline"}
+                    className="h-auto py-4 text-base font-medium"
+                    aria-pressed={isSelected}
+                    onClick={() => toggleCondition(item.id)}
+                  >
+                    {item.label}
+                  </Button>
+                );
+              })}
+            </div>
+            <div className="flex justify-between pt-4">
+              <Button variant="ghost" onClick={handleBack}>{dict.onboarding.back}</Button>
+              <Button onClick={handleNext}>
+                {dict.onboarding.nextButton}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
+          <div className="space-y-8">
+            <div className="space-y-2 text-center">
+              <h1 className="text-3xl font-bold tracking-tight">{dict.onboarding.step4Title}</h1>
+              <p className="text-muted-foreground">{dict.onboarding.step4Subtitle}</p>
+            </div>
             <div className="p-6 rounded-lg bg-muted/50 space-y-4">
               <div>
                 <span className="font-semibold">{dict.onboarding.userTypeLabel}</span>
@@ -142,6 +194,17 @@ export function OnboardingFlow({ locale, dict }: { locale: string; dict: Record<
                     ? needs.map((n) => {
                         const f = availableFilters.find(f => f.id === n);
                         return locale === 'ar' ? f?.labelAr || f?.label || n : f?.label || n;
+                      }).join(", ")
+                    : dict.onboarding.noneSpecified}
+                </span>
+              </div>
+              <div>
+                <span className="font-semibold">{dict.onboarding.conditionsLabel}</span>
+                <span>
+                  {conditions.length > 0
+                    ? conditions.map((c) => {
+                        const item = medicalConditionsList.find(m => m.id === c);
+                        return item?.label || c;
                       }).join(", ")
                     : dict.onboarding.noneSpecified}
                 </span>

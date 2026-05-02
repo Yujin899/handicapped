@@ -4,10 +4,21 @@ import React from 'react';
 import { Accessibility, CheckCircle, ChevronRight, Star, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
+import Link from 'next/link';
 import { Badge, Button, ClinicCard } from './shared-ui';
 import { SearchSection } from './search-section';
+import { getClinics } from '@/lib/data';
+import type { Clinic } from '@/lib/types';
 
 export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
+  const [topClinics, setTopClinics] = React.useState<Clinic[]>([]);
+
+  React.useEffect(() => {
+    getClinics().then(allClinics => {
+      const sorted = [...allClinics].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      setTopClinics(sorted.slice(0, 3));
+    });
+  }, []);
   const fadeIn: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
@@ -99,20 +110,43 @@ export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
               </motion.p>
             </div>
             <motion.div variants={fadeIn}>
-              <Button variant="outline" className="hidden md:flex gap-2 font-bold h-12 border-2 px-6 rounded-xl hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all">
-                {dict.actions.exploreAll} <ChevronRight className="h-4 w-4 rtl:rotate-180" />
+              <Button asChild variant="outline" className="hidden md:flex items-center gap-2 font-bold h-12 border-2 px-6 rounded-xl hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all whitespace-nowrap shrink-0">
+                <Link href={`/${locale}/clinics`} className="flex items-center gap-2">
+                  {dict.actions.exploreAll} <ChevronRight className="h-4 w-4 rtl:rotate-180 shrink-0" />
+                </Link>
               </Button>
             </motion.div>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
-            {[
-              { id: "oakwood-general", name: dict.data.oakwood, rating: "4.9", type: dict.data.generalHospital, badges: [dict.search.filterWheelchair, dict.data.aslSupport], imageSrc: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800" },
-              { id: "serenity-dentistry", name: dict.data.serenity, rating: "4.8", type: dict.data.dentistry, badges: [dict.data.quietSpaces, dict.search.filterWheelchair], imageSrc: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800" },
-              { id: "horizon-optometry", name: dict.data.horizon, rating: "4.7", type: dict.data.optometry, badges: [dict.data.serviceAnimals, dict.data.aslSupport], imageSrc: "https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?auto=format&fit=crop&q=80&w=800" },
-            ].map((clinic) => (
-              <ClinicCard key={clinic.id} clinic={clinic} dict={dict} locale={locale} />
-            ))}
+            {topClinics.length > 0 ? (
+              topClinics.map((clinic) => {
+                // Map real clinic data to ClinicCard expectations
+                const mappedClinic = {
+                  id: clinic.id,
+                  name: locale === 'ar' ? clinic.nameAr || clinic.name : clinic.name,
+                  rating: (clinic.rating || 0).toFixed(1),
+                  type: locale === 'ar' ? clinic.specialtyAr || clinic.specialty || "رعاية صحية" : clinic.specialty || "Healthcare",
+                  imageSrc: clinic.imageSrc,
+                  badges: Object.entries(clinic.accessibility || {})
+                    .filter(([, value]) => value === true)
+                    .map(([key]) => {
+                      if (key === 'wheelchair') return locale === 'ar' ? 'وصول الكراسي' : 'Wheelchair';
+                      if (key === 'hearing') return locale === 'ar' ? 'دعم السمع' : 'Hearing';
+                      if (key === 'quiet') return locale === 'ar' ? 'بيئة هادئة' : 'Quiet';
+                      if (key === 'visual') return locale === 'ar' ? 'مساعدة بصرية' : 'Visual';
+                      return key;
+                    })
+                };
+                return (
+                  <ClinicCard key={clinic.id} clinic={mappedClinic} dict={dict} locale={locale} />
+                );
+              })
+            ) : (
+              [1, 2, 3].map((i) => (
+                <div key={i} className="h-[400px] rounded-[32px] bg-muted/20 animate-pulse" />
+              ))
+            )}
           </div>
           <motion.div 
             initial={{ opacity: 0 }}
@@ -120,8 +154,10 @@ export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
             viewport={{ once: true }}
             className="md:hidden mt-12"
           >
-            <Button variant="outline" className="w-full h-14 font-black border-2 rounded-2xl">
-              {dict.actions.viewAll}
+            <Button asChild variant="outline" className="w-full h-14 font-black border-2 rounded-2xl">
+              <Link href={`/${locale}/clinics`}>
+                {dict.actions.viewAll}
+              </Link>
             </Button>
           </motion.div>
         </div>
@@ -269,8 +305,10 @@ export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
               {dict.cta.subtitle}
             </motion.p>
             <motion.div variants={fadeIn}>
-              <Button size="lg" variant="secondary" className="h-16 px-16 text-xl font-black shadow-2xl hover:scale-105 transition-transform rounded-[24px]">
-                {dict.actions.startSearch}
+              <Button asChild size="lg" variant="secondary" className="h-16 px-16 text-xl font-black shadow-2xl hover:scale-105 transition-transform rounded-[24px]">
+                <Link href={`/${locale}/clinics`}>
+                  {dict.actions.startSearch}
+                </Link>
               </Button>
             </motion.div>
           </motion.div>

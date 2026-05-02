@@ -16,6 +16,7 @@ import { getDictionary } from "../../i18n/dictionaries";
 import { Header } from "../../components/header";
 import { Footer } from "../../components/footer";
 import { AuthProvider } from "../../components/auth-provider";
+import { ChatWidget } from "../../components/chat-widget";
 
 export default async function RootLayout({
   children,
@@ -44,6 +45,7 @@ export default async function RootLayout({
                 {children}
               </main>
               <Footer dict={dict} locale={locale} />
+              <ChatWidget locale={locale} />
             </div>
           </AuthProvider>
         </ThemeProvider>

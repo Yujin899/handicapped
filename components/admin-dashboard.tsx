@@ -337,6 +337,44 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
     { label: d.stats.reviews, value: reviews.length, icon: MessageSquareText },
   ]
 
+  const handleSeedData = async () => {
+    if (!window.confirm("This will write mock data to Firestore. Existing documents with the same IDs will be overwritten. Proceed?")) return;
+    setIsLoadingData(true);
+    setError("");
+    try {
+      const { mockClinics } = await import("@/lib/mock-data");
+      const { mockFilters } = await import("@/lib/mock-filters");
+      const mockSpecialties = [
+        { id: "general", name: "General Hospital", nameAr: "مستشفى عام" },
+        { id: "dentistry", name: "Dentistry", nameAr: "طب الأسنان" },
+        { id: "optometry", name: "Optometry", nameAr: "فحص النظر" },
+        { id: "pediatrics", name: "Pediatrics", nameAr: "طب الأطفال" },
+        { id: "physiotherapy", name: "Physiotherapy", nameAr: "العلاج الطبيعي" },
+        { id: "cardiology", name: "Cardiology", nameAr: "طب القلب" },
+        { id: "rehabilitation", name: "Rehabilitation", nameAr: "التأهيل" },
+        { id: "orthopedics", name: "Orthopedics", nameAr: "جراحة العظام" },
+        { id: "mental-health", name: "Mental Health", nameAr: "الصحة النفسية" },
+        { id: "multi-specialty", name: "Multi-Specialty", nameAr: "متعدد التخصصات" }
+      ];
+
+      const { doc, setDoc } = await import("firebase/firestore");
+      const { db } = await import("@/lib/firebase");
+
+      const clinicPromises = mockClinics.map(c => setDoc(doc(db, "clinics", c.id), c));
+      const filterPromises = mockFilters.map(f => setDoc(doc(db, "filters", f.id), f));
+      const specialtyPromises = mockSpecialties.map(s => setDoc(doc(db, "specialties", s.id), s));
+
+      await Promise.all([...clinicPromises, ...filterPromises, ...specialtyPromises]);
+      alert("Database seeded successfully!");
+      await loadDashboard();
+    } catch (err) {
+      console.error(err);
+      setError(getFriendlyFirebaseError(err));
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
+
   return (
     <section className="container mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-10">
       <div className="space-y-6">
@@ -350,9 +388,14 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
               {d.subtitle}
             </p>
           </div>
-          <Button variant="outline" onClick={() => void loadDashboard()} disabled={isLoadingData}>
-            {d.refresh}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => void loadDashboard()} disabled={isLoadingData}>
+              {d.refresh}
+            </Button>
+            <Button variant="default" onClick={handleSeedData} disabled={isLoadingData}>
+              Seed Mock Data
+            </Button>
+          </div>
         </header>
 
         {error && (
@@ -770,11 +813,26 @@ export function AdminDashboard({ locale, dict }: { locale: string, dict: any }) 
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <ActivityList title={d.recentBookings} empty={d.noActivity} items={bookings.map((booking) => ({
-            id: booking.id,
-            title: booking.clinicName,
-            detail: `${booking.date} at ${booking.time}`,
-          }))} />
+          <ActivityList 
+            title={d.recentBookings} 
+            empty={d.noActivity} 
+            items={bookings.map((booking) => ({
+              id: booking.id,
+              title: booking.clinicName,
+              detail: `${booking.date} at ${booking.time}`,
+              tags: [
+                ...(booking.accessibilityPreferences || []).map(p => {
+                  const f = filters.find(filter => filter.id === p);
+                  return { label: f?.label || p, variant: "secondary" as const };
+                }),
+                ...(booking.medicalConditions || []).map(c => ({
+                  label: c.charAt(0).toUpperCase() + c.slice(1),
+                  variant: "outline" as const,
+                  className: "border-primary/30 bg-primary/5 text-primary"
+                }))
+              ]
+            }))} 
+          />
           <ActivityList title={d.recentReviews} empty={d.noActivity} items={reviews.map((review) => ({
             id: review.id,
             title: `${review.rating}/5 for ${review.clinicId}`,
@@ -793,7 +851,12 @@ function ActivityList({
 }: {
   title: string
   empty: string
-  items: Array<{ id: string; title: string; detail: string }>
+  items: Array<{ 
+    id: string; 
+    title: string; 
+    detail: string; 
+    tags?: Array<{ label: string; variant: "default" | "secondary" | "outline" | "destructive"; className?: string }> 
+  }>
 }) {
   return (
     <Card className="rounded-md border-border/80 shadow-sm">
@@ -804,10 +867,27 @@ function ActivityList({
         {items.length === 0 ? (
           <p className="rounded-md bg-muted/20 p-4 text-sm text-muted-foreground">{empty}</p>
         ) : (
-          items.slice(0, 6).map((item) => (
-            <div key={item.id} className="rounded-md border border-border/80 p-3">
-              <p className="text-sm font-semibold">{item.title}</p>
-              <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{item.detail}</p>
+          items.slice(0, 10).map((item) => (
+            <div key={item.id} className="rounded-md border border-border/80 p-3 space-y-2">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-semibold">{item.title}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{item.detail}</p>
+                </div>
+              </div>
+              {item.tags && item.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {item.tags.map((tag, idx) => (
+                    <Badge 
+                      key={idx} 
+                      variant={tag.variant} 
+                      className={`text-[10px] px-1.5 py-0 h-5 ${tag.className || ""}`}
+                    >
+                      {tag.label}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           ))
         )}

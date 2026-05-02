@@ -87,11 +87,25 @@ export function BookingPage({
   const selectedDateLabel =
     dateOptions.find((date) => date.key === selectedDate)?.label ?? dateOptions[0].label
 
-  const accessibilityNotes = (profile?.accessibilityPreferences?.length ? profile.accessibilityPreferences : ["wheelchair", "quiet", "hearing"])
+  const accessibilityNotes = (profile?.accessibilityPreferences?.length ? profile.accessibilityPreferences : [])
     .map(id => {
       const filter = mockFilters.find(f => f.id === id)
       return locale === 'ar' ? filter?.labelAr || filter?.label || id : filter?.label || id
     })
+
+  const medicalConditionsNotes = (profile?.medicalConditions?.length ? profile.medicalConditions : [])
+    .map(id => {
+      const conditionMap: Record<string, string> = {
+        diabetes: dict.onboarding.conditionDiabetes,
+        hypertension: dict.onboarding.conditionHypertension,
+        cardiac: dict.onboarding.conditionCardiac,
+        asthma: dict.onboarding.conditionAsthma,
+        epilepsy: dict.onboarding.conditionEpilepsy,
+        kidney: dict.onboarding.conditionKidney,
+        arthritis: dict.onboarding.conditionArthritis,
+      };
+      return conditionMap[id] || id;
+    });
 
   const canSubmit = name.trim().length > 1
 
@@ -115,6 +129,8 @@ export function BookingPage({
         date: selectedDate,
         time: selectedTime,
         notes: note.trim(),
+        medicalConditions: profile?.medicalConditions || [],
+        accessibilityPreferences: profile?.accessibilityPreferences || [],
       })
 
       const params = new URLSearchParams({
@@ -124,6 +140,7 @@ export function BookingPage({
         time: selectedTime,
         note: note.trim(),
         prefs: accessibilityNotes.join("|"),
+        conditions: medicalConditionsNotes.join("|"),
       })
 
       router.push(`/${locale}/booking/success?${params.toString()}`)
@@ -242,18 +259,37 @@ export function BookingPage({
                 </div>
               </div>
 
-              <Card className="rounded-md border-none bg-muted/20 shadow-none">
-                <CardContent className="space-y-3 p-4 pt-4">
-                  <p className="text-sm font-semibold">{dict.booking.accessibilityReminder}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {accessibilityNotes.map((preference) => (
-                      <Badge key={preference} variant="secondary" className="rounded-md">
-                        {isArabic ? "✓" : "✔"} {preference}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              {(accessibilityNotes.length > 0 || medicalConditionsNotes.length > 0) && (
+                <Card className="rounded-md border-none bg-muted/20 shadow-none">
+                  <CardContent className="space-y-4 p-4 pt-4">
+                    <p className="text-sm font-semibold">{dict.booking.accessibilityReminder}</p>
+                    {accessibilityNotes.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground">{dict.onboarding.needsLabel}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {accessibilityNotes.map((preference) => (
+                            <Badge key={preference} variant="secondary" className="rounded-md">
+                              {isArabic ? "✓" : "✔"} {preference}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {medicalConditionsNotes.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground">{dict.onboarding.conditionsLabel}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {medicalConditionsNotes.map((condition) => (
+                            <Badge key={condition} variant="outline" className="rounded-md border-primary/30 bg-primary/5 text-primary">
+                              {isArabic ? "●" : "●"} {condition}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {error && (
                 <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">

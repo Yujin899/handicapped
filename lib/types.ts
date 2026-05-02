@@ -8,6 +8,7 @@ export type UserProfile = {
   name: string
   createdAt: Timestamp | null
   accessibilityPreferences: AccessibilityPreference[]
+  medicalConditions?: string[]
   role: "user" | "admin"
 }
 
@@ -50,6 +51,8 @@ export type Booking = {
   time: string
   notes: string
   createdAt: Timestamp | null
+  medicalConditions?: string[]
+  accessibilityPreferences?: AccessibilityPreference[]
 }
 
 export type Review = {
@@ -64,6 +67,8 @@ export type Review = {
 
 export type CreateBookingInput = Omit<Booking, "id" | "createdAt" | "userId"> & {
   userId: string
+  medicalConditions?: string[]
+  accessibilityPreferences?: AccessibilityPreference[]
 }
 
 export type CreateReviewInput = Omit<Review, "id" | "createdAt" | "userId"> & {

@@ -26,6 +26,7 @@ export async function ensureUserDocument(user: Pick<User, "uid" | "email">, name
     name,
     createdAt: serverTimestamp(),
     accessibilityPreferences: [],
+    medicalConditions: [],
     role: "user",
   }
 
@@ -49,7 +50,7 @@ export async function getUser(uid: string) {
 
 export async function updateUserProfile(
   uid: string,
-  data: Partial<Pick<UserProfile, "name" | "accessibilityPreferences">>
+  data: Partial<Pick<UserProfile, "name" | "accessibilityPreferences" | "medicalConditions">>
 ) {
   await updateDoc(doc(db, "users", uid), data)
 }
@@ -59,6 +60,13 @@ export async function updateAccessibilityPreferences(
   preferences: AccessibilityPreference[]
 ) {
   await updateUserProfile(uid, { accessibilityPreferences: preferences })
+}
+
+export async function updateMedicalConditions(
+  uid: string,
+  conditions: string[]
+) {
+  await updateUserProfile(uid, { medicalConditions: conditions })
 }
 
 export async function getUsers() {

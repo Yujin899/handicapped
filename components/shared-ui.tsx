@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Activity, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Slot } from "radix-ui";
 
 export const Wheelchair = memo((props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -26,6 +27,8 @@ export const Wheelchair = memo((props: React.SVGProps<SVGSVGElement>) => (
     <path d="M11 5.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0" />
   </svg>
 ));
+Wheelchair.displayName = "Wheelchair";
+
 export const GoogleIcon = memo((props: React.SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
@@ -52,7 +55,7 @@ export const GoogleIcon = memo((props: React.SVGProps<SVGSVGElement>) => (
 ));
 GoogleIcon.displayName = "GoogleIcon";
 
-export const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'default' | 'outline' | 'ghost' | 'secondary', size?: 'default' | 'sm' | 'lg' | 'xl' | '2xl' | 'icon' }>(({ className, variant = 'default', size = 'default', ...props }, ref) => {
+export const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'default' | 'outline' | 'ghost' | 'secondary', size?: 'default' | 'sm' | 'lg' | 'xl' | '2xl' | 'icon', asChild?: boolean }>(({ className, variant = 'default', size = 'default', asChild = false, ...props }, ref) => {
   const baseStyles = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]";
   const variants = {
     default: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20",
@@ -68,12 +71,13 @@ export const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttrib
     "2xl": "h-14 rounded-2xl px-12 text-lg gap-4",
     icon: "h-10 w-10",
   };
+
+  const Comp = asChild ? Slot.Root : motion.button;
   
   return (
-    <motion.button
+    <Comp
       ref={ref as any}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.98 }}
+      {...(asChild ? {} : { whileHover: { scale: 1.01 }, whileTap: { scale: 0.98 } })}
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className || ''}`}
       {...props as any}
     />

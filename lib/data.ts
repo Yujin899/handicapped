@@ -13,7 +13,6 @@ import {
 
 import { db } from "@/lib/firebase"
 import type { Booking, Clinic, CreateBookingInput, CreateReviewInput, Review } from "@/lib/types"
-import { mockClinics } from "./mock-data"
 
 export async function getClinics() {
   const snapshot = await getDocs(collection(db, "clinics"))
@@ -23,15 +22,7 @@ export async function getClinics() {
     ...clinicDoc.data(),
   })) as Clinic[]
 
-  // Combine firebase clinics with mock clinics, prioritizing firebase ones if IDs clash
-  const combined = [...firebaseClinics]
-  for (const mock of mockClinics) {
-    if (!combined.find(c => c.id === mock.id)) {
-      combined.push(mock)
-    }
-  }
-
-  return combined
+  return firebaseClinics
 }
 
 export async function getClinicById(id: string) {
@@ -43,9 +34,7 @@ export async function getClinicById(id: string) {
     } as Clinic
   }
 
-  // Fallback to mock data
-  const mock = mockClinics.find(c => c.id === id)
-  return mock || null
+  return null
 }
 
 export async function saveClinic(clinic: Clinic) {
@@ -64,6 +53,8 @@ export async function createBooking(input: CreateBookingInput) {
     date: input.date,
     time: input.time,
     notes: input.notes,
+    medicalConditions: input.medicalConditions || [],
+    accessibilityPreferences: input.accessibilityPreferences || [],
     createdAt: serverTimestamp(),
   })
 
