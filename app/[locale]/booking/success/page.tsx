@@ -113,13 +113,20 @@ export default async function BookingSuccessPage({
           </CardContent>
         </Card>
 
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Button asChild className="h-11 flex-1 rounded-md">
-            <Link href={`/${locale}/clinics`}>{dict.bookingSuccess.backToClinics}</Link>
-          </Button>
-          <Button asChild variant="outline" className="h-11 flex-1 rounded-md">
-            <Link href={`/${locale}/clinics/oakwood-medical-center`}>
-              {dict.bookingSuccess.viewClinic}
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button asChild className="h-14 flex-1 rounded-xl text-base font-bold shadow-sm">
+              <Link href={`/${locale}/clinics`}>{dict.bookingSuccess.backToClinics}</Link>
+            </Button>
+            <Button asChild variant="outline" className="h-14 flex-1 rounded-xl text-base font-bold border-2">
+              <Link href={`/${locale}/clinics/${query.clinicId || "oakwood-medical-center"}`}>
+                {dict.bookingSuccess.viewClinic}
+              </Link>
+            </Button>
+          </div>
+          <Button asChild variant="ghost" className="h-12 w-full rounded-xl text-sm font-semibold text-muted-foreground hover:bg-primary/5 hover:text-primary">
+            <Link href={`/${locale}/profile`}>
+              {dict.bookingSuccess.viewProfile}
             </Link>
           </Button>
         </div>

@@ -55,7 +55,7 @@ export function ProfilePage({ locale, dict }: { locale: string, dict: any }) {
       setName(profile?.name ?? "")
       setPreferences(profile?.accessibilityPreferences ?? [])
       setMedicalConditions(profile?.medicalConditions ?? [])
-      setPhotoURL(profile?.photoURL ?? "/profile.png")
+      setPhotoURL(profile?.photoURL || currentUser?.photoURL || "/profile.png")
     }, 0)
 
     return () => window.clearTimeout(timeoutId)

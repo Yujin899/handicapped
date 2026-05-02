@@ -97,7 +97,9 @@ export function BookingPage({
     .split("-")
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(" ")
-  const clinicName = firestoreClinicName || fallbackClinicName
+  const clinicName = isArabic 
+    ? (firestoreClinicNameAr || firestoreClinicName || fallbackClinicName)
+    : (firestoreClinicName || fallbackClinicName)
 
   React.useEffect(() => {
     getClinicById(clinicId)
@@ -166,6 +168,7 @@ export function BookingPage({
 
       const params = new URLSearchParams({
         id: bookingId,
+        clinicId: clinicId,
         clinic: isArabic ? (firestoreClinicNameAr || clinicName) : clinicName,
         date: selectedDateLabel,
         time: selectedTime,

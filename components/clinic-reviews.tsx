@@ -40,7 +40,7 @@ export function ClinicReviews({
   accessibilityFeatures?: Record<string, boolean | undefined>
   dict: any
 }) {
-  const { currentUser } = useAuth()
+  const { currentUser, profile } = useAuth()
   const [reviews, setReviews] = React.useState<Review[]>([])
   const [rating, setRating] = React.useState(5)
   const [comment, setComment] = React.useState("")
@@ -155,7 +155,7 @@ export function ClinicReviews({
         comment: comment.trim(),
         accessibilityTags: tags,
         userName: currentUser.displayName || currentUser.email?.split('@')[0] || dict.reviews.verifiedPatient,
-        userImage: currentUser.photoURL || "/profile.png",
+        userImage: profile?.photoURL || currentUser.photoURL || "/profile.png",
         images: reviewImages,
       })
       setComment("")
@@ -297,9 +297,9 @@ export function ClinicReviews({
               <p className="text-muted-foreground text-sm leading-relaxed font-medium">&quot;{review.comment}&quot;</p>
               
               {review.images && review.images.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-2">
+                <div className="flex flex-wrap gap-3 pt-2">
                   {review.images.map((img, i) => (
-                    <div key={i} className="relative h-24 w-32 shrink-0 overflow-hidden rounded-xl border border-border/50">
+                    <div key={i} className="relative h-32 w-40 shrink-0 overflow-hidden rounded-2xl border-2 border-border/30 shadow-sm transition-transform hover:scale-[1.02] cursor-zoom-in">
                       <Image src={img} alt="Review attachment" fill className="object-cover" />
                     </div>
                   ))}

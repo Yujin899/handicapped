@@ -12,7 +12,7 @@ import {
 import { db } from "@/lib/firebase"
 import type { AccessibilityPreference, UserProfile } from "@/lib/types"
 
-export async function ensureUserDocument(user: Pick<User, "uid" | "email">, name = "") {
+export async function ensureUserDocument(user: Pick<User, "uid" | "email" | "photoURL">, name = "") {
   const userRef = doc(db, "users", user.uid)
   const snapshot = await getDoc(userRef)
 
@@ -24,6 +24,7 @@ export async function ensureUserDocument(user: Pick<User, "uid" | "email">, name
     uid: user.uid,
     email: user.email,
     name,
+    photoURL: user.photoURL || null,
     createdAt: serverTimestamp(),
     accessibilityPreferences: [],
     medicalConditions: [],
