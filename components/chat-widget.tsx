@@ -347,8 +347,8 @@ export function ChatWidget({ locale }: { locale: string }) {
                         className={cn(
                           "max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap",
                           m.role === "user"
-                            ? "bg-primary text-primary-foreground rounded-br-none"
-                            : "bg-white border border-border/60 text-foreground rounded-bl-none shadow-sm"
+                            ? cn("bg-primary text-primary-foreground", isArabic ? "rounded-bl-none" : "rounded-br-none")
+                            : cn("bg-white border border-border/60 text-foreground shadow-sm", isArabic ? "rounded-br-none" : "rounded-bl-none")
                         )}
                       >
                         {m.role === "user" ? (m.displayContent || m.content) : (
