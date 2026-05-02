@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { Badge, Button, ClinicCard } from './shared-ui';
 import { SearchSection } from './search-section';
 import { getClinics } from '@/lib/data';
-import { getFilters, type Filter } from '@/lib/filters';
+import { getFilters, type Filter, getFilterLabel } from '@/lib/filters';
 import type { Clinic } from '@/lib/types';
 
 export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
@@ -138,7 +138,7 @@ export function HomeClient({ dict, locale }: { dict: any, locale: string }) {
                       const filter = availableFilters.find(f => f.id === key);
                       return {
                         id: key,
-                        label: locale === 'ar' ? filter?.labelAr || filter?.label || key : filter?.label || key,
+                        label: getFilterLabel(key, locale, filter),
                         icon: filter?.icon || 'Accessibility'
                       };
                     })

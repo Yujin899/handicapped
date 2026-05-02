@@ -29,3 +29,30 @@ export async function saveFilter(filter: Filter) {
 export async function deleteFilter(id: string) {
   await deleteDoc(doc(db, "filters", id))
 }
+
+const defaultTranslations: Record<string, { en: string, ar: string }> = {
+  wheelchair: { en: "Wheelchair Access", ar: "وصول الكراسي المتحركة" },
+  hearing: { en: "Hearing Support", ar: "دعم السمع" },
+  quiet: { en: "Quiet Environment", ar: "بيئة هادئة" },
+  visual: { en: "Visual Assistance", ar: "مساعدة بصرية" },
+  homeVisit: { en: "Home Visit", ar: "زيارة منزلية" },
+}
+
+export function getFilterLabel(id: string, locale: string, filter?: Filter) {
+  const isArabic = locale === 'ar'
+  
+  // 1. Try from database object
+  if (filter) {
+    const label = isArabic ? filter.labelAr || filter.label : filter.label
+    if (label) return label
+  }
+
+  // 2. Try from fallbacks
+  const fallback = defaultTranslations[id]
+  if (fallback) {
+    return isArabic ? fallback.ar : fallback.en
+  }
+
+  // 3. Last resort: format the key
+  return id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, ' $1')
+}

@@ -9,6 +9,7 @@ import Image from "next/image"
 import { useAuth } from "@/components/auth-provider"
 import { mockClinics } from "@/lib/mock-data"
 import Link from "next/link"
+import { getFilterLabel } from "@/lib/filters"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -84,22 +85,26 @@ function ClinicCardInline({ id, isArabic, locale, onBookNow }: { id: string, isA
   if (!clinic) return null
 
   return (
-    <div className="my-3 flex flex-col gap-2 rounded-xl border border-primary/20 bg-background p-3 shadow-sm transition hover:shadow-md">
+    <div className="my-3 flex flex-col gap-2 rounded-xl border border-primary/20 bg-card p-3 shadow-sm transition hover:shadow-md">
       <div className="flex items-start justify-between gap-2">
         <div>
           <h4 className="font-semibold text-primary">{isArabic ? clinic.nameAr : clinic.name}</h4>
           <p className="text-xs text-muted-foreground">{isArabic ? clinic.specialtyAr : clinic.specialty}</p>
         </div>
-        <div className="flex items-center gap-1 rounded-md bg-yellow-400/10 px-1.5 py-0.5 text-xs font-bold text-yellow-600">
+        <div className="flex items-center gap-1 rounded-md bg-yellow-400/10 px-1.5 py-0.5 text-xs font-bold text-yellow-600 dark:text-yellow-500">
           ⭐ {clinic.rating}
         </div>
       </div>
       
       <div className="flex flex-wrap gap-1 mt-1">
-        {clinic.accessibility?.wheelchair && <span className="text-[10px] bg-blue-500/10 text-blue-700 px-1.5 py-0.5 rounded">♿ {isArabic ? "كرسي متحرك" : "Wheelchair"}</span>}
-        {clinic.accessibility?.hearing && <span className="text-[10px] bg-purple-500/10 text-purple-700 px-1.5 py-0.5 rounded">🦻 {isArabic ? "سمع" : "Hearing"}</span>}
-        {clinic.accessibility?.quiet && <span className="text-[10px] bg-green-500/10 text-green-700 px-1.5 py-0.5 rounded">🤫 {isArabic ? "هادئ" : "Quiet"}</span>}
-        {clinic.accessibility?.visual && <span className="text-[10px] bg-orange-500/10 text-orange-700 px-1.5 py-0.5 rounded">👁️ {isArabic ? "بصري" : "Visual"}</span>}
+        {Object.entries(clinic.accessibility || {}).map(([key, value]) => {
+          if (!value) return null
+          return (
+            <span key={key} className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+              {getFilterLabel(key, locale)}
+            </span>
+          )
+        })}
       </div>
 
       <div className="mt-2 flex items-center justify-between border-t border-border/50 pt-2">
@@ -314,7 +319,7 @@ export function ChatWidget({ locale }: { locale: string }) {
                     <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border-2 border-background shadow-sm">
                       <Image src="/mosaed.png" alt="Mosaed" fill className="object-cover" />
                     </div>
-                    <div className="max-w-[80%] rounded-2xl rounded-tl-none bg-white border border-border/60 px-4 py-3 shadow-sm text-sm text-foreground leading-relaxed">
+                    <div className="max-w-[80%] rounded-2xl rounded-tl-none bg-card border border-border/60 px-4 py-3 shadow-sm text-sm text-foreground leading-relaxed">
                       {isArabic
                         ? "👋 أهلاً! أنا مساعد، دليلك لإيجاد العيادة الطبية الأنسب لك. كيف يمكنني مساعدتك اليوم؟"
                         : "👋 Hello! I'm Mosaed, your guide to finding the right accessible clinic in Egypt. How can I help you today?"}
@@ -348,7 +353,7 @@ export function ChatWidget({ locale }: { locale: string }) {
                           "max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap",
                           m.role === "user"
                             ? cn("bg-primary text-primary-foreground", isArabic ? "rounded-bl-none" : "rounded-br-none")
-                            : cn("bg-white border border-border/60 text-foreground shadow-sm", isArabic ? "rounded-br-none" : "rounded-bl-none")
+                            : cn("bg-card border border-border/60 text-foreground shadow-sm", isArabic ? "rounded-br-none" : "rounded-bl-none")
                         )}
                       >
                         {m.role === "user" ? (m.displayContent || m.content) : (

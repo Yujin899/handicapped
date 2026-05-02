@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button, Wheelchair, Input } from './shared-ui';
-import { getPopularFilters, type Filter } from '@/lib/filters';
+import { getPopularFilters, type Filter, getFilterLabel } from '@/lib/filters';
 import { LocationCombobox } from './location-combobox';
 import { SpecialtyCombobox } from './specialty-combobox';
 
@@ -116,7 +116,7 @@ export function SearchSection({ dict, locale }: { dict: any; locale: string }) {
                 aria-pressed={isActive}
               >
                 <Icon className={`h-5 w-5 transition-all duration-300 ${isActive ? 'text-primary scale-110' : 'text-muted-foreground/80 group-hover:text-primary'}`} aria-hidden="true" /> 
-                <span>{locale === 'ar' ? filter.labelAr || filter.label : filter.label}</span>
+                <span>{getFilterLabel(filter.id, locale, filter)}</span>
               </motion.button>
             );
           })}

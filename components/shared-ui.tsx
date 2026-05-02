@@ -162,7 +162,7 @@ export const ClinicCard = memo(({ clinic, dict, locale }: { clinic: { id: string
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           {clinic.homeVisitAvailable && (
             <div className="bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-lg">
-              {locale === 'ar' ? "زيارة منزلية متاحة" : "Home Visit Available"}
+              {dict.clinicListing?.homeVisitBadge || (locale === 'ar' ? "زيارة منزلية متاحة" : "Home Visit Available")}
             </div>
           )}
         </div>

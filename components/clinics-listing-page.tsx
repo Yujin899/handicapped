@@ -24,7 +24,7 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { getClinics } from "@/lib/data"
-import { getFilters, type Filter } from "@/lib/filters"
+import { getFilters, type Filter, getFilterLabel } from "@/lib/filters"
 import { iconMap } from "@/components/search-section"
 import type { Clinic } from "@/lib/types"
 import { LocationCombobox } from "./location-combobox"
@@ -260,9 +260,9 @@ export function ClinicsListingPage({
     setFilters({})
   }
 
-  const filterButtons = availableFilters.map(f => ({
+   const filterButtons = availableFilters.map(f => ({
     key: f.id,
-    label: locale === 'ar' ? f.labelAr || f.label : f.label,
+    label: getFilterLabel(f.id, locale, f),
     icon: iconMap[f.icon as keyof typeof iconMap] || iconMap.Accessibility
   }))
 
@@ -477,12 +477,15 @@ export function ClinicsListingPage({
                         {Object.entries(clinic.accessibility || {}).map(([key, value]) => {
                           if (!value) return null
                           const filter = availableFilters.find(f => f.id === key)
-                          if (!filter) return null
-                          const Icon = iconMap[filter.icon as keyof typeof iconMap] || iconMap.Accessibility
+                          // We still show the badge even if the filter definition isn't loaded yet,
+                          // using our robust getFilterLabel helper with fallbacks.
                           return (
                             <Badge key={key} variant="secondary" className="gap-1 rounded-md">
-                              <Icon className="size-3.5" />
-                              {locale === 'ar' ? filter.labelAr || filter.label : filter.label}
+                              {(() => {
+                                const Icon = (filter && iconMap[filter.icon as keyof typeof iconMap]) || iconMap.Accessibility
+                                return <Icon className="size-3.5" />
+                              })()}
+                              {getFilterLabel(key, locale, filter)}
                             </Badge>
                           )
                         })}

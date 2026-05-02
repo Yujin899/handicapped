@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getClinicById } from "@/lib/data"
-import { getFilters, type Filter } from "@/lib/filters"
+import { getFilters, type Filter, getFilterLabel } from "@/lib/filters"
 import { iconMap } from "@/components/search-section"
 import type { Clinic } from "@/lib/types"
 
@@ -133,7 +133,7 @@ export function ClinicDetailsPageClient({
 
   const accessibility = availableFilters.map((f) => ({
     key: f.id,
-    label: locale === 'ar' ? f.labelAr || f.label : f.label,
+    label: getFilterLabel(f.id, locale, f),
     available: Boolean(clinic.accessibility?.[f.id]),
     icon: iconMap[f.icon as keyof typeof iconMap] || iconMap.Accessibility,
   }))
