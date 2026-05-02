@@ -40,6 +40,17 @@ type BookingDict = {
     filterHearing: string
     filterQuiet: string
   }
+  onboarding: {
+    conditionDiabetes: string
+    conditionHypertension: string
+    conditionCardiac: string
+    conditionAsthma: string
+    conditionEpilepsy: string
+    conditionKidney: string
+    conditionArthritis: string
+    needsLabel: string
+    conditionsLabel: string
+  }
 }
 
 const dateOptions = [

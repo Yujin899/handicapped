@@ -96,10 +96,10 @@ function ClinicCardInline({ id, isArabic, locale }: { id: string, isArabic: bool
       </div>
       
       <div className="flex flex-wrap gap-1 mt-1">
-        {clinic.accessibility.wheelchair && <span className="text-[10px] bg-blue-500/10 text-blue-700 px-1.5 py-0.5 rounded">♿ {isArabic ? "كرسي متحرك" : "Wheelchair"}</span>}
-        {clinic.accessibility.hearing && <span className="text-[10px] bg-purple-500/10 text-purple-700 px-1.5 py-0.5 rounded">🦻 {isArabic ? "سمع" : "Hearing"}</span>}
-        {clinic.accessibility.quiet && <span className="text-[10px] bg-green-500/10 text-green-700 px-1.5 py-0.5 rounded">🤫 {isArabic ? "هادئ" : "Quiet"}</span>}
-        {clinic.accessibility.visual && <span className="text-[10px] bg-orange-500/10 text-orange-700 px-1.5 py-0.5 rounded">👁️ {isArabic ? "بصري" : "Visual"}</span>}
+        {clinic.accessibility?.wheelchair && <span className="text-[10px] bg-blue-500/10 text-blue-700 px-1.5 py-0.5 rounded">♿ {isArabic ? "كرسي متحرك" : "Wheelchair"}</span>}
+        {clinic.accessibility?.hearing && <span className="text-[10px] bg-purple-500/10 text-purple-700 px-1.5 py-0.5 rounded">🦻 {isArabic ? "سمع" : "Hearing"}</span>}
+        {clinic.accessibility?.quiet && <span className="text-[10px] bg-green-500/10 text-green-700 px-1.5 py-0.5 rounded">🤫 {isArabic ? "هادئ" : "Quiet"}</span>}
+        {clinic.accessibility?.visual && <span className="text-[10px] bg-orange-500/10 text-orange-700 px-1.5 py-0.5 rounded">👁️ {isArabic ? "بصري" : "Visual"}</span>}
       </div>
 
       <div className="mt-2 flex items-center justify-between border-t border-border/50 pt-2">

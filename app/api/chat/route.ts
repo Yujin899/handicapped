@@ -47,21 +47,21 @@ export async function POST(req: Request) {
       let score = 0
       
       // Specialty matching
-      if (recentUserText.includes(clinic.specialty.toLowerCase())) score += 10
+      if (clinic.specialty && recentUserText.includes(clinic.specialty.toLowerCase())) score += 10
       if (clinic.specialtyAr && recentUserText.includes(clinic.specialtyAr.toLowerCase())) score += 10
       
       // Location matching
-      if (recentUserText.includes(clinic.location.toLowerCase())) score += 5
+      if (clinic.location && recentUserText.includes(clinic.location.toLowerCase())) score += 5
       if (clinic.locationAr && recentUserText.includes(clinic.locationAr.toLowerCase())) score += 5
       
       // Accessibility matching
-      if (clinic.accessibility.wheelchair && (recentUserText.includes("wheelchair") || recentUserText.includes("كرسي"))) score += 3
-      if (clinic.accessibility.hearing && (recentUserText.includes("hearing") || recentUserText.includes("سمع"))) score += 3
-      if (clinic.accessibility.quiet && (recentUserText.includes("quiet") || recentUserText.includes("هادئ"))) score += 3
-      if (clinic.accessibility.visual && (recentUserText.includes("visual") || recentUserText.includes("بصر"))) score += 3
+      if (clinic.accessibility?.wheelchair && (recentUserText.includes("wheelchair") || recentUserText.includes("كرسي"))) score += 3
+      if (clinic.accessibility?.hearing && (recentUserText.includes("hearing") || recentUserText.includes("سمع"))) score += 3
+      if (clinic.accessibility?.quiet && (recentUserText.includes("quiet") || recentUserText.includes("هادئ"))) score += 3
+      if (clinic.accessibility?.visual && (recentUserText.includes("visual") || recentUserText.includes("بصر"))) score += 3
 
       // Base score (rating) to act as tie-breaker
-      score += (clinic.rating / 5)
+      score += ((clinic.rating || 0) / 5)
 
       return { clinic, score }
     })
@@ -81,10 +81,10 @@ export async function POST(req: Request) {
       rating: c.rating,
       reviews: c.reviews,
       accessibility: {
-        wheelchair: c.accessibility.wheelchair,
-        hearing: c.accessibility.hearing,
-        quiet: c.accessibility.quiet,
-        visual: c.accessibility.visual,
+        wheelchair: c.accessibility?.wheelchair ?? false,
+        hearing: c.accessibility?.hearing ?? false,
+        quiet: c.accessibility?.quiet ?? false,
+        visual: c.accessibility?.visual ?? false,
       },
     }))
     // --------------------------------------
@@ -176,7 +176,6 @@ Remember: You may be the first resource for someone who has struggled to find ac
       system: systemPrompt,
       messages,
       temperature: 0.4,
-      maxTokens: 900,
     })
 
     return result.toTextStreamResponse()
